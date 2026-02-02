@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bay Area Direct | Same-Day Courier Service</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #1d1d1f;
+            --gray-dark: #424245;
+            --gray-mid: #86868b;
+            --gray-light: #f5f5f7;
+            --white: #ffffff;
+            --accent: #0071e3;
+            --accent-hover: #0077ed;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--white);
+            background: var(--black);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(29, 29, 31, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--white);
+            letter-spacing: -0.02em;
+        }
+
+        .logo span {
+            color: var(--gray-mid);
+            font-weight: 400;
+        }
+
+        .header-phone {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-phone a {
+            color: var(--white);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .header-phone a:hover {
+            color: var(--accent);
+        }
+
+        .header-cta {
+            background: var(--accent);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: 980px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 0 0 rgba(0, 113, 227, 0);
+            position: relative;
+        }
+
+        .header-cta:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 0 20px 5px rgba(0, 113, 227, 0.5), 0 0 40px 10px rgba(0, 113, 227, 0.3);
+            transform: scale(1.05);
+        }
+
+        .header-cta::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 980px;
+            background: linear-gradient(45deg, #0071e3, #00c6ff, #0071e3);
+            background-size: 200% 200%;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            animation: gradientShift 2s ease infinite;
+        }
+
+        .header-cta:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Hero */
+        .hero {
+            min-height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 140px 24px 80px;
+            background: linear-gradient(180deg, rgba(29,29,31,0.85) 0%, rgba(29,29,31,0.9) 100%),
+                        url('https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=1920&q=80') center/cover no-repeat;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 980px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gray-light);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero h1 {
+            font-size: clamp(48px, 8vw, 80px);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            max-width: 900px;
+            margin-bottom: 24px;
+        }
+
+        .hero p {
+            font-size: clamp(18px, 2.5vw, 21px);
+            color: var(--gray-mid);
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .hero-phone {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+            display: block;
+            transition: opacity 0.2s;
+        }
+
+        .hero-phone:hover {
+            opacity: 0.8;
+        }
+
+        .hero-subtext {
+            font-size: 14px;
+            color: var(--gray-mid);
+        }
+
+        /* Services */
+        .services {
+            padding: 80px 24px;
+            background: var(--gray-dark);
+        }
+
+        .services-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gray-mid);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: clamp(36px, 6vw, 56px);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 60px;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .service-card {
+            background: var(--black);
+            padding: 32px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .service-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .service-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .service-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .service-card p {
+            font-size: 15px;
+            color: var(--gray-mid);
+            line-height: 1.6;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 80px 24px;
+            background: var(--black);
+        }
+
+        .how-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .step {
+            text-align: left;
+        }
+
+        .step-number {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--accent);
+            margin-bottom: 12px;
+            letter-spacing: 0.1em;
+        }
+
+        .step h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step p {
+            font-size: 15px;
+            color: var(--gray-mid);
+            line-height: 1.6;
+        }
+
+        /* Coverage */
+        .coverage {
+            padding: 80px 24px;
+            background: var(--gray-dark);
+        }
+
+        .coverage-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .coverage-inner {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .coverage-content h2 {
+            font-size: clamp(36px, 6vw, 56px);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        .coverage-content p {
+            font-size: 18px;
+            color: var(--gray-mid);
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .coverage-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            list-style: none;
+        }
+
+        .coverage-list li {
+            font-size: 15px;
+            color: var(--white);
+            padding: 8px 0;
+        }
+
+        .coverage-list li::before {
+            content: "•";
+            color: var(--accent);
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+        }
+
+        .coverage-visual {
+            height: 400px;
+            background: linear-gradient(135deg, rgba(0, 113, 227, 0.2), rgba(0, 113, 227, 0.05)),
+                        url('https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=800&q=80') center/cover no-repeat;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Contact */
+        .contact {
+            padding: 80px 24px;
+            background: var(--black);
+        }
+
+        .contact-inner {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .contact h2 {
+            font-size: clamp(36px, 6vw, 56px);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .contact > p {
+            font-size: 18px;
+            color: var(--gray-mid);
+            margin-bottom: 40px;
+        }
+
+        .contact-phone {
+            display: block;
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .contact-phone:hover {
+            opacity: 0.8;
+        }
+
+        .contact-hours {
+            font-size: 14px;
+            color: var(--gray-mid);
+            margin-bottom: 48px;
+        }
+
+        .contact-divider {
+            position: relative;
+            text-align: center;
+            margin: 48px 0;
+        }
+
+        .contact-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-divider span {
+            position: relative;
+            background: var(--black);
+            padding: 0 16px;
+            font-size: 14px;
+            color: var(--gray-mid);
+        }
+
+        .contact-form {
+            text-align: left;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--white);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--gray-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: var(--white);
+            border: none;
+            border-radius: 980px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .form-submit:hover {
+            background: var(--accent-hover);
+            transform: scale(1.02);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 24px;
+            background: var(--gray-dark);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .footer-info p {
+            font-size: 14px;
+            color: var(--gray-mid);
+            margin-bottom: 4px;
+        }
+
+        .footer-info p strong {
+            color: var(--white);
+        }
+
+        .footer-trust {
+            display: flex;
+            gap: 24px;
+            font-size: 13px;
+            color: var(--gray-mid);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--gray-dark);
+            padding: 40px;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 32px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .modal-close:hover {
+            opacity: 0.7;
+        }
+
+        .modal h3 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .modal > p {
+            color: var(--gray-mid);
+            margin-bottom: 24px;
+        }
+
+        /* Reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <div class="logo">Bay Area <span>Direct</span></div>
+            <div class="header-phone">
+                <a href="tel:+14157303332">(415) 730-3332</a>
+                <a href="#contact" class="header-cta" id="openModal">Request Pickup</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-badge">Bay Area Courier Service</div>
+        <h1>Same-day delivery.<br>No exceptions.</h1>
+        <p>When it has to be there today—legal filings, lab results, urgent documents—we get it done.</p>
+        <a href="tel:+14157303332" class="hero-phone">(415) 730-3332</a>
+        <p class="hero-subtext">Call now for immediate dispatch</p>
+    </section>
+
+    <section class="services">
+        <div class="services-inner">
+            <div class="section-label reveal">What We Deliver</div>
+            <h2 class="section-title reveal reveal-delay-1">Built for businesses that can't wait.</h2>
+            <div class="service-grid">
+                <div class="service-card reveal reveal-delay-1">
+                    <div class="service-icon">⚖️</div>
+                    <div>
+                        <h3>Legal & Court Filings</h3>
+                        <p>Same-day court filings, serve and file, registered process service. We know the clerks and the deadlines.</p>
+                    </div>
+                </div>
+                <div class="service-card reveal reveal-delay-2">
+                    <div class="service-icon">🏥</div>
+                    <div>
+                        <h3>Medical & Lab Specimens</h3>
+                        <p>HIPAA-compliant transport of lab work, medical records, specimens. Temperature-controlled when needed.</p>
+                    </div>
+                </div>
+                <div class="service-card reveal reveal-delay-3">
+                    <div class="service-icon">💼</div>
+                    <div>
+                        <h3>Corporate & Rush</h3>
+                        <p>Board documents, final paychecks, keys, access cards. Whatever your business needs moved—today.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <div class="how-inner">
+            <div class="section-label reveal">How It Works</div>
+            <h2 class="section-title reveal reveal-delay-1">Call. We dispatch. It arrives.</h2>
+            <div class="steps">
+                <div class="step reveal reveal-delay-1">
+                    <div class="step-number">01</div>
+                    <h3>You call</h3>
+                    <p>Tell us what needs to move, from where, to where, and when it needs to arrive.</p>
+                </div>
+                <div class="step reveal reveal-delay-2">
+                    <div class="step-number">02</div>
+                    <h3>We dispatch</h3>
+                    <p>A courier is assigned immediately. You get a name and ETA within minutes.</p>
+                </div>
+                <div class="step reveal reveal-delay-3">
+                    <div class="step-number">03</div>
+                    <h3>Pickup</h3>
+                    <p>Our courier arrives, confirms the package, and heads directly to the destination.</p>
+                </div>
+                <div class="step reveal reveal-delay-4">
+                    <div class="step-number">04</div>
+                    <h3>Delivered</h3>
+                    <p>Signature confirmation. Proof of delivery. You're notified the moment it arrives.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="coverage">
+        <div class="coverage-inner">
+            <div class="coverage-content">
+                <h2 class="reveal">The entire Bay Area. Same day.</h2>
+                <p class="reveal reveal-delay-1">From San Francisco to San Jose, Oakland to Palo Alto. We know the routes, the traffic, the courthouse clerks, and the hospital loading docks. Local knowledge, reliable delivery.</p>
+                <ul class="coverage-list reveal reveal-delay-2">
+                    <li>San Francisco</li>
+                    <li>Oakland</li>
+                    <li>San Jose</li>
+                    <li>Palo Alto</li>
+                    <li>Berkeley</li>
+                    <li>Fremont</li>
+                    <li>Walnut Creek</li>
+                    <li>Redwood City</li>
+                    <li>San Mateo</li>
+                    <li>Mountain View</li>
+                </ul>
+            </div>
+            <div class="coverage-visual reveal reveal-delay-3"></div>
+        </div>
+    </section>
+
+    <section class="contact" id="contact">
+        <div class="contact-inner">
+            <h2 class="reveal">Ready when you are.</h2>
+            <p class="reveal reveal-delay-1">Call for immediate dispatch or send us your details.</p>
+
+            <a href="tel:+14157303332" class="contact-phone reveal reveal-delay-2">(415) 730-3332</a>
+            <p class="contact-hours reveal reveal-delay-2">Monday–Sunday 8am–6pm • After-hours available</p>
+
+            <div class="contact-divider reveal reveal-delay-3">
+                <span>or request a pickup</span>
+            </div>
+
+            <form class="contact-form reveal reveal-delay-4" action="#" method="POST">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstname">First Name</label>
+                        <input type="text" id="firstname" name="firstname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastname">Last Name</label>
+                        <input type="text" id="lastname" name="lastname" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone (optional)</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="company">Company (optional)</label>
+                    <input type="text" id="company" name="company">
+                </div>
+                <div class="form-group">
+                    <label for="details">What do you need delivered?</label>
+                    <textarea id="details" name="details" placeholder="Package type, timing requirements..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="destination">Where do you need it delivered?</label>
+                    <textarea id="destination" name="destination" placeholder="Pickup location and destination address..."></textarea>
+                </div>
+                <button type="submit" class="form-submit">Request Pickup</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-info">
+                <p><strong>Bay Area Direct</strong></p>
+                <p>San Francisco Bay Area Courier Service</p>
+                <p>© 2025 Bay Area Direct. All rights reserved.</p>
+            </div>
+            <div class="footer-trust">
+                <span>Fully Insured</span>
+                <span>Bonded</span>
+                <span>HIPAA Compliant</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <button class="modal-close" id="closeModal">&times;</button>
+            <h3>Request Pickup</h3>
+            <p>Tell us what you need delivered and we'll call you right back.</p>
+            <form action="#" method="POST">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modal-firstname">First Name</label>
+                        <input type="text" id="modal-firstname" name="firstname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-lastname">Last Name</label>
+                        <input type="text" id="modal-lastname" name="lastname" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modal-email">Email</label>
+                        <input type="email" id="modal-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-phone">Phone (optional)</label>
+                        <input type="tel" id="modal-phone" name="phone">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="modal-company">Company (optional)</label>
+                    <input type="text" id="modal-company" name="company">
+                </div>
+                <div class="form-group">
+                    <label for="modal-details">What do you need delivered?</label>
+                    <textarea id="modal-details" name="details" placeholder="Package type, timing requirements..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="modal-destination">Where do you need it delivered?</label>
+                    <textarea id="modal-destination" name="destination" placeholder="Pickup location and destination address..."></textarea>
+                </div>
+                <button type="submit" class="form-submit">Request Callback</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Scroll Reveal
+        const revealElements = document.querySelectorAll('.reveal');
+
+        const revealOnScroll = () => {
+            revealElements.forEach(el => {
+                const elementTop = el.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+
+                if (elementTop < windowHeight - 100) {
+                    el.classList.add('visible');
+                }
+            });
+        };
+
+        // Run on load and scroll
+        window.addEventListener('scroll', revealOnScroll);
+        window.addEventListener('load', revealOnScroll);
+
+        // Modal
+        const modalOverlay = document.getElementById('modalOverlay');
+        const openModalBtn = document.getElementById('openModal');
+        const closeModalBtn = document.getElementById('closeModal');
+
+        openModalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                modalOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    </script>
+</body>
+</html>
