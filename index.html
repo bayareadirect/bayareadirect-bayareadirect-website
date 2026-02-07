@@ -4,6 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bay Area Direct | Same-Day Courier Service</title>
+    <meta name="description" content="Bay Area Direct provides same-day courier service across the SF Bay Area. Legal filings, medical specimens, rush deliveries. HIPAA compliant, fully insured. Call (415) 730-3332.">
+    <link rel="canonical" href="https://bayareadirect.com/">
+    <meta name="robots" content="index, follow">
+    <meta name="geo.region" content="US-CA">
+    <meta name="geo.placename" content="San Francisco Bay Area">
+    <meta name="theme-color" content="#1d1d1f">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Bay Area Direct | Same-Day Courier Service">
+    <meta property="og:description" content="Same-day courier delivery across the SF Bay Area. Legal filings, medical specimens, corporate rush deliveries. HIPAA compliant. Call (415) 730-3332.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bayareadirect.com/">
+    <meta property="og:site_name" content="Bay Area Direct">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Bay Area Direct | Same-Day Courier Service">
+    <meta name="twitter:description" content="Same-day courier delivery across the SF Bay Area. Legal filings, medical specimens, corporate rush deliveries. Call (415) 730-3332.">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -63,6 +83,7 @@
             font-weight: 600;
             color: var(--white);
             letter-spacing: -0.02em;
+            text-decoration: none;
         }
 
         .logo span {
@@ -362,10 +383,10 @@
 
         .coverage-visual {
             height: 400px;
-            background: linear-gradient(135deg, rgba(0, 113, 227, 0.2), rgba(0, 113, 227, 0.05)),
-                        url('https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=800&q=80') center/cover no-repeat;
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
         }
 
         /* Contact */
@@ -629,19 +650,109 @@
         .reveal-delay-3 { transition-delay: 0.3s; }
         .reveal-delay-4 { transition-delay: 0.4s; }
     </style>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "additionalType": "https://schema.org/CourierService",
+      "name": "Bay Area Direct",
+      "alternateName": "Bay Area Direct Courier",
+      "description": "Same-day courier service in the San Francisco Bay Area specializing in legal filings, medical specimen transport, and corporate rush deliveries.",
+      "url": "https://bayareadirect.com",
+      "telephone": "+1-415-730-3332",
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "San Francisco",
+        "addressRegion": "CA",
+        "addressCountry": "US"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 37.7749,
+        "longitude": -122.4194
+      },
+      "areaServed": [
+        {"@type": "County", "name": "San Francisco County"},
+        {"@type": "County", "name": "Alameda County"},
+        {"@type": "County", "name": "Santa Clara County"},
+        {"@type": "County", "name": "San Mateo County"},
+        {"@type": "County", "name": "Contra Costa County"}
+      ],
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+        "opens": "08:00",
+        "closes": "18:00"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Courier Services",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Legal & Court Filing Delivery",
+              "description": "Same-day court filings, serve and file, registered process service throughout the San Francisco Bay Area."
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Medical & Lab Specimen Transport",
+              "description": "HIPAA-compliant transport of lab work, medical records, and specimens with temperature-controlled options."
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Corporate & Rush Delivery",
+              "description": "Same-day delivery of board documents, final paychecks, keys, access cards, and other urgent business items."
+            }
+          }
+        ]
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Bay Area Direct",
+      "alternateName": "Bay Area Direct Courier",
+      "url": "https://bayareadirect.com",
+      "telephone": "+1-415-730-3332",
+      "description": "Professional same-day courier and delivery service serving the San Francisco Bay Area.",
+      "knowsAbout": ["courier service", "same-day delivery", "legal filing delivery", "medical specimen transport", "HIPAA compliant delivery"],
+      "slogan": "Same-day delivery. No exceptions."
+    }
+    </script>
+
+    <noscript>
+      <style>.reveal { opacity: 1 !important; transform: none !important; }</style>
+    </noscript>
 </head>
 <body>
     <header>
         <div class="header-inner">
-            <div class="logo">Bay Area <span>Direct</span></div>
-            <div class="header-phone">
-                <a href="tel:+14157303332">(415) 730-3332</a>
-                <a href="#contact" class="header-cta" id="openModal">Request Pickup</a>
-            </div>
+            <a href="/" class="logo" aria-label="Bay Area Direct - Home">Bay Area <span>Direct</span></a>
+            <nav aria-label="Main navigation">
+                <div class="header-phone">
+                    <a href="tel:+14157303332">(415) 730-3332</a>
+                    <a href="#contact" class="header-cta" id="openModal">Request Pickup</a>
+                </div>
+            </nav>
         </div>
     </header>
 
-    <section class="hero">
+    <main>
+    <section class="hero" id="home">
         <div class="hero-badge">Bay Area Courier Service</div>
         <h1>Same-day delivery.<br>No exceptions.</h1>
         <p>When it has to be there today—legal filings, lab results, urgent documents—we get it done.</p>
@@ -649,10 +760,10 @@
         <p class="hero-subtext">Call now for immediate dispatch</p>
     </section>
 
-    <section class="services">
+    <section class="services" id="services">
         <div class="services-inner">
             <div class="section-label reveal">What We Deliver</div>
-            <h2 class="section-title reveal reveal-delay-1">Built for businesses that can't wait.</h2>
+            <h2 class="section-title reveal reveal-delay-1">Same-Day Courier Services for Bay Area Businesses</h2>
             <div class="service-grid">
                 <div class="service-card reveal reveal-delay-1">
                     <div class="service-icon">⚖️</div>
@@ -679,7 +790,7 @@
         </div>
     </section>
 
-    <section class="how-it-works">
+    <section class="how-it-works" id="how-it-works">
         <div class="how-inner">
             <div class="section-label reveal">How It Works</div>
             <h2 class="section-title reveal reveal-delay-1">Call. We dispatch. It arrives.</h2>
@@ -708,10 +819,10 @@
         </div>
     </section>
 
-    <section class="coverage">
+    <section class="coverage" id="coverage">
         <div class="coverage-inner">
             <div class="coverage-content">
-                <h2 class="reveal">The entire Bay Area. Same day.</h2>
+                <h2 class="reveal">Same-Day Delivery Across the San Francisco Bay Area</h2>
                 <p class="reveal reveal-delay-1">From San Francisco to San Jose, Oakland to Palo Alto. We know the routes, the traffic, the courthouse clerks, and the hospital loading docks. Local knowledge, reliable delivery.</p>
                 <ul class="coverage-list reveal reveal-delay-2">
                     <li>San Francisco</li>
@@ -726,13 +837,18 @@
                     <li>Mountain View</li>
                 </ul>
             </div>
-            <div class="coverage-visual reveal reveal-delay-3"></div>
+            <div class="coverage-visual reveal reveal-delay-3">
+                <img src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=800&q=80"
+                     alt="Bay Area landscape - courier delivery coverage area including San Francisco, Oakland, San Jose, and Palo Alto"
+                     width="800" height="533" loading="lazy"
+                     style="width:100%;height:100%;object-fit:cover;">
+            </div>
         </div>
     </section>
 
     <section class="contact" id="contact">
         <div class="contact-inner">
-            <h2 class="reveal">Ready when you are.</h2>
+            <h2 class="reveal">Request a Same-Day Courier Pickup</h2>
             <p class="reveal reveal-delay-1">Call for immediate dispatch or send us your details.</p>
 
             <a href="tel:+14157303332" class="contact-phone reveal reveal-delay-2">(415) 730-3332</a>
@@ -779,13 +895,16 @@
             </form>
         </div>
     </section>
+    </main>
 
     <footer>
         <div class="footer-inner">
             <div class="footer-info">
                 <p><strong>Bay Area Direct</strong></p>
-                <p>San Francisco Bay Area Courier Service</p>
-                <p>© 2025 Bay Area Direct. All rights reserved.</p>
+                <p>Same-Day Courier & Delivery Service</p>
+                <p>Serving San Francisco, Alameda, Santa Clara, San Mateo & Contra Costa Counties</p>
+                <p><a href="tel:+14157303332" style="color:var(--gray-mid);text-decoration:none;">(415) 730-3332</a> &bull; info@bayareadirect.com</p>
+                <p>&copy; 2026 Bay Area Direct. All rights reserved.</p>
             </div>
             <div class="footer-trust">
                 <span>Fully Insured</span>
