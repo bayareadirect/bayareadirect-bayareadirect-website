@@ -171,14 +171,14 @@
             display: inline-block;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 6px 14px;
+            padding: 8px 20px;
             border-radius: 980px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--gray-light);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--white);
             margin-bottom: 24px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.08em;
         }
 
         .hero h1 {
@@ -227,6 +227,7 @@
         .services-inner {
             max-width: 1200px;
             margin: 0 auto;
+            text-align: center;
         }
 
         .section-label {
@@ -258,6 +259,7 @@
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: transform 0.3s, border-color 0.3s;
+            text-align: left;
         }
 
         .service-card:hover {
@@ -383,6 +385,8 @@
 
         .coverage-visual {
             height: 400px;
+            background: linear-gradient(135deg, rgba(0, 113, 227, 0.2), rgba(0, 113, 227, 0.05)),
+                        url('https://images.unsplash.com/photo-1619468129361-605ebea04b44?w=800&q=80') center/cover no-repeat;
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             overflow: hidden;
@@ -649,6 +653,235 @@
         .reveal-delay-2 { transition-delay: 0.2s; }
         .reveal-delay-3 { transition-delay: 0.3s; }
         .reveal-delay-4 { transition-delay: 0.4s; }
+
+        /* Hero CTA button */
+        .hero-cta {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--white);
+            padding: 16px 40px;
+            border-radius: 980px;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+            margin-bottom: 24px;
+        }
+
+        .hero-cta:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px 5px rgba(0, 113, 227, 0.5);
+        }
+
+        /* Hamburger menu */
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            z-index: 1001;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--white);
+            margin: 5px 0;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* Mobile nav menu */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(29, 29, 31, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+        }
+
+        .mobile-nav.active {
+            display: flex;
+        }
+
+        .mobile-nav a {
+            color: var(--white);
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .mobile-nav a:hover {
+            color: var(--accent);
+        }
+
+        .mobile-nav .mobile-cta {
+            background: var(--accent);
+            padding: 16px 40px;
+            border-radius: 980px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        /* Sticky call bar for mobile */
+        .sticky-call-bar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--accent);
+            padding: 14px 24px;
+            text-align: center;
+        }
+
+        .sticky-call-bar a {
+            color: var(--white);
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* ===== MOBILE STYLES ===== */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .header-phone {
+                display: none;
+            }
+
+            .header-inner {
+                padding: 12px 16px;
+            }
+
+            .hero {
+                padding: 100px 20px 50px;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+                margin-bottom: 16px;
+            }
+
+            .hero p {
+                font-size: 16px;
+                margin-bottom: 24px;
+            }
+
+            .hero-phone {
+                font-size: 28px;
+                background: var(--accent);
+                color: var(--white) !important;
+                padding: 16px 32px;
+                border-radius: 980px;
+                display: inline-block;
+                margin-bottom: 12px;
+                text-decoration: none;
+            }
+
+            .hero-phone:hover {
+                opacity: 1;
+                transform: scale(1.02);
+            }
+
+            .hero-subtext {
+                margin-bottom: 0;
+            }
+
+            .hero-cta {
+                padding: 14px 32px;
+                font-size: 16px;
+            }
+
+            .sticky-call-bar {
+                display: block;
+            }
+
+            body {
+                padding-bottom: 56px;
+            }
+
+            .services {
+                padding: 50px 16px;
+            }
+
+            .how-it-works {
+                padding: 50px 16px;
+            }
+
+            .coverage {
+                padding: 50px 16px;
+            }
+
+            .coverage-visual {
+                height: 250px;
+                background-image: url('https://images.unsplash.com/photo-1619468129361-605ebea04b44?w=800&q=80');
+                background-size: cover;
+                background-position: center;
+            }
+
+            .contact {
+                padding: 50px 16px;
+            }
+
+            .contact h2 {
+                font-size: 28px;
+            }
+
+            .contact-phone {
+                font-size: 28px;
+                background: var(--accent);
+                color: var(--white) !important;
+                padding: 14px 28px;
+                border-radius: 980px;
+                display: inline-block;
+                margin-bottom: 12px;
+            }
+
+            footer {
+                padding: 30px 16px;
+                padding-bottom: 70px;
+            }
+
+            .footer-inner {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-trust {
+                justify-content: center;
+            }
+        }
     </style>
 
     <!-- Structured Data -->
@@ -748,16 +981,28 @@
                     <a href="#contact" class="header-cta" id="openModal">Request Pickup</a>
                 </div>
             </nav>
+            <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </header>
 
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav" id="mobileNav">
+        <a href="tel:+14157303332">Call (415) 730-3332</a>
+        <a href="#contact" class="mobile-cta" id="mobileRequestBtn">Request Pickup</a>
+    </nav>
+
     <main>
     <section class="hero" id="home">
-        <div class="hero-badge">Bay Area Courier Service</div>
+        <div class="hero-badge">Bay Area Direct</div>
         <h1>Same-day delivery.<br>No exceptions.</h1>
         <p>When it has to be there today—legal filings, lab results, urgent documents—we get it done.</p>
         <a href="tel:+14157303332" class="hero-phone">(415) 730-3332</a>
         <p class="hero-subtext">Call now for immediate dispatch</p>
+        <a href="#contact" class="hero-cta" id="heroCta">Request a Pickup</a>
     </section>
 
     <section class="services" id="services">
@@ -958,6 +1203,11 @@
         </div>
     </div>
 
+    <!-- Sticky Call Bar for Mobile -->
+    <div class="sticky-call-bar">
+        <a href="tel:+14157303332">📞 Call Now — (415) 730-3332</a>
+    </div>
+
     <script>
         // Scroll Reveal
         const revealElements = document.querySelectorAll('.reveal');
@@ -1005,6 +1255,45 @@
             if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
                 modalOverlay.classList.remove('active');
                 document.body.style.overflow = '';
+            }
+        });
+
+        // Hamburger menu
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const mobileNav = document.getElementById('mobileNav');
+
+        hamburgerBtn.addEventListener('click', () => {
+            hamburgerBtn.classList.toggle('active');
+            mobileNav.classList.toggle('active');
+            document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+        });
+
+        // Close mobile nav when link clicked
+        mobileNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburgerBtn.classList.remove('active');
+                mobileNav.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+
+        // Mobile Request Pickup opens modal
+        const mobileRequestBtn = document.getElementById('mobileRequestBtn');
+        mobileRequestBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            hamburgerBtn.classList.remove('active');
+            mobileNav.classList.remove('active');
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        // Hero CTA opens modal on desktop, scrolls to form on mobile
+        const heroCta = document.getElementById('heroCta');
+        heroCta.addEventListener('click', (e) => {
+            if (window.innerWidth > 768) {
+                e.preventDefault();
+                modalOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
             }
         });
     </script>
