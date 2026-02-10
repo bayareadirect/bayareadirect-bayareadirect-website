@@ -746,29 +746,6 @@
             font-weight: 600;
         }
 
-        /* Sticky call bar for mobile */
-        .sticky-call-bar {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            background: var(--accent);
-            padding: 14px 24px;
-            text-align: center;
-        }
-
-        .sticky-call-bar a {
-            color: var(--white);
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
 
         /* ===== MOBILE STYLES ===== */
         @media (max-width: 768px) {
@@ -823,12 +800,8 @@
                 font-size: 16px;
             }
 
-            .sticky-call-bar {
-                display: block;
-            }
-
             body {
-                padding-bottom: 56px;
+                padding-bottom: 0;
             }
 
             .services {
@@ -1203,10 +1176,6 @@
         </div>
     </div>
 
-    <!-- Sticky Call Bar for Mobile -->
-    <div class="sticky-call-bar">
-        <a href="tel:+14157303332">📞 Call Now — (415) 730-3332</a>
-    </div>
 
     <script>
         // Scroll Reveal
