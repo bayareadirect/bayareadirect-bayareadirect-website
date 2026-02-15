@@ -24,6 +24,15 @@
     <meta name="twitter:title" content="Bay Area Direct | Same-Day Courier Service">
     <meta name="twitter:description" content="Same-day courier delivery across the SF Bay Area. Legal filings, medical specimens, corporate rush deliveries. Call (415) 730-3332.">
 
+    <!-- Google tag (gtag.js) - Google Ads Conversion Tracking -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-6351641017"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-6351641017');
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -1264,6 +1273,33 @@
                 modalOverlay.classList.add('active');
                 document.body.style.overflow = 'hidden';
             }
+        });
+
+        // Google Ads Conversion Tracking
+        // Track phone call clicks
+        document.querySelectorAll('a[href="tel:+14157303332"]').forEach(link => {
+            link.addEventListener('click', () => {
+                if (typeof gtag === 'function') {
+                    gtag('event', 'conversion', {
+                        'send_to': 'AW-6351641017/phone_call',
+                        'event_category': 'engagement',
+                        'event_label': 'phone_call'
+                    });
+                }
+            });
+        });
+
+        // Track form submissions
+        document.querySelectorAll('form[action*="formspree"]').forEach(form => {
+            form.addEventListener('submit', () => {
+                if (typeof gtag === 'function') {
+                    gtag('event', 'conversion', {
+                        'send_to': 'AW-6351641017/form_submit',
+                        'event_category': 'engagement',
+                        'event_label': 'form_submission'
+                    });
+                }
+            });
         });
     </script>
 </body>
