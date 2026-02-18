@@ -1,0 +1,14 @@
+{
+  "name": "Dispatch — Bay Area Direct",
+  "short_name": "Dispatch",
+  "description": "Bay Area Direct internal dispatch tracker",
+  "start_url": "/dispatch/",
+  "display": "standalone",
+  "background_color": "#0d0f1a",
+  "theme_color": "#0071e3",
+  "orientation": "any",
+  "icons": [
+    { "src": "/dispatch/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/dispatch/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

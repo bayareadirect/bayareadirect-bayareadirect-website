@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Dispatch — Bay Area Direct</title>
+    <link rel="manifest" href="/dispatch/manifest.json">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark:    #0d0f1a;
+            --bg-card:    #161927;
+            --bg-sidebar: #111320;
+            --bg-hover:   #1e2235;
+            --border:     rgba(255,255,255,0.08);
+            --col-border: rgba(255,255,255,0.05);
+            --text-primary:   #f0f2ff;
+            --text-secondary: #8892b0;
+            --text-muted:     #4a5568;
+            --accent-blue:   #0071e3;
+            --accent-green:  #00c875;
+            --accent-orange: #ff9500;
+            --accent-red:    #ff3b30;
+            --accent-gold:   #ffd60a;
+            --accent-purple: #7c5cbf;
+        }
+
+        html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-primary); font-size: 14px; -webkit-font-smoothing: antialiased; overflow: hidden; }
+
+        /* ========== PASSWORD GATE ========== */
+        .password-gate {
+            position: fixed; inset: 0; background: var(--bg-dark);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 24px; z-index: 9999;
+        }
+        .password-gate.hidden { display: none; }
+        .logo-big {
+            width: 80px; height: 80px; background: var(--accent-blue);
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            font-size: 36px;
+        }
+        .password-gate h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.02em; }
+        .password-gate p { color: var(--text-secondary); font-size: 15px; }
+        .password-form { display: flex; flex-direction: column; gap: 12px; width: 280px; max-width: 90vw; }
+        .password-form input {
+            padding: 14px 16px; background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text-primary); font-size: 16px; font-family: inherit;
+            outline: none; transition: border-color 0.2s;
+        }
+        .password-form input:focus { border-color: var(--accent-blue); }
+        .password-form button {
+            padding: 14px; background: var(--accent-blue); border: none; border-radius: 10px;
+            color: white; font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+        }
+        .password-form button:hover { opacity: 0.85; }
+        .password-error { color: var(--accent-red); font-size: 13px; text-align: center; display: none; }
+        .password-error.show { display: block; }
+
+        /* ========== INSTALL BANNER ========== */
+        .install-banner {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
+            background: linear-gradient(135deg, #1e2235, #161927);
+            border-top: 1px solid var(--border); padding: 16px 24px;
+            display: none; align-items: center; justify-content: space-between; gap: 16px;
+            padding-bottom: max(16px, env(safe-area-inset-bottom));
+        }
+        .install-banner.show { display: flex; }
+        .install-banner-text { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
+        .install-banner-actions { display: flex; gap: 8px; }
+        .install-btn { padding: 8px 16px; background: var(--accent-blue); border: none; border-radius: 8px; color: white; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .dismiss-btn { padding: 8px 16px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); font-size: 13px; cursor: pointer; }
+
+        /* ========== LAYOUT ========== */
+        .app-container { display: flex; height: 100vh; overflow: hidden; }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: 220px; background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; flex-shrink: 0;
+            padding-top: env(safe-area-inset-top);
+        }
+        .sidebar-header { padding: 20px 16px 16px; border-bottom: 1px solid var(--border); }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 32px; height: 32px; background: var(--accent-blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+        .logo-text { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+        .logo-text span { display: block; font-size: 10px; font-weight: 400; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        .sync-status { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 11px; color: var(--text-secondary); }
+        .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); }
+        .sync-status.synced .sync-dot { background: var(--accent-green); }
+        .sync-status.syncing .sync-dot { background: var(--accent-orange); animation: pulse 1s infinite; }
+        .sync-status.offline .sync-dot, .sync-status.error .sync-dot { background: var(--accent-red); }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        .profile-section { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+        .profile-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-blue); display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+        .profile-name { font-size: 13px; font-weight: 600; }
+        .profile-role { font-size: 11px; color: var(--text-secondary); }
+
+        .sidebar-nav { flex: 1; padding: 8px; overflow-y: auto; }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+            border-radius: 8px; cursor: pointer; color: var(--text-secondary);
+            font-size: 13px; font-weight: 500; transition: all 0.15s;
+            position: relative; overflow: hidden; min-height: 44px;
+        }
+        .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .nav-item.active { background: rgba(0,113,227,0.15); color: var(--accent-blue); }
+        .nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+        .sidebar-email-box { padding: 12px; border-top: 1px solid var(--border); }
+        .sidebar-footer { padding: 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+        .fun-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-size: 11px; cursor: pointer; text-align: left; }
+        .fun-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+        .mobile-header { display: none; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .mobile-menu-btn { background: transparent; border: none; color: var(--text-primary); font-size: 22px; cursor: pointer; min-height: 44px; min-width: 44px; }
+
+        .board-header { padding: 24px 24px 0; flex-shrink: 0; }
+        .board-title { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+        .board-subtitle { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
+
+        .toolbar {
+            display: flex; align-items: center; gap: 8px; padding: 16px 24px;
+            flex-wrap: wrap; flex-shrink: 0; border-bottom: 1px solid var(--border);
+        }
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+            border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+            border: 1px solid transparent; transition: all 0.15s; white-space: nowrap; min-height: 36px;
+        }
+        .btn-primary { background: var(--accent-blue); color: white; }
+        .btn-primary:hover { opacity: 0.85; }
+        .btn-secondary { background: var(--bg-card); color: var(--text-primary); border-color: var(--border); }
+        .btn-secondary:hover { background: var(--bg-hover); }
+        .search-box { display: flex; align-items: center; gap: 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; flex: 1; max-width: 280px; }
+        .search-box input { background: none; border: none; color: var(--text-primary); font-size: 13px; outline: none; width: 100%; }
+        .view-toggle { display: flex; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .view-toggle button { padding: 7px 12px; background: none; border: none; color: var(--text-secondary); font-size: 12px; cursor: pointer; }
+        .view-toggle button.active { background: var(--accent-blue); color: white; }
+        .sort-dropdown { padding: 7px 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 12px; cursor: pointer; }
+
+        /* ========== BOARD CONTENT ========== */
+        .board-content { flex: 1; overflow-y: auto; padding: 16px 24px 24px; }
+
+        /* ========== ALERTS ========== */
+        .alert-banner {
+            display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+            border-radius: 10px; margin-bottom: 12px; font-size: 13px;
+            background: rgba(255,149,0,0.1); border: 1px solid rgba(255,149,0,0.3);
+        }
+        .alert-banner.urgent { background: rgba(255,59,48,0.1); border-color: rgba(255,59,48,0.3); }
+
+        /* ========== STATS ========== */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+        .stat-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+            padding: 18px; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .stat-value { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+        .stat-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+        .stat-card.blue .stat-value { color: var(--accent-blue); }
+        .stat-card.orange .stat-value { color: var(--accent-orange); }
+        .stat-card.red .stat-value { color: var(--accent-red); }
+        .stat-card.green .stat-value { color: var(--accent-green); }
+        .stat-card.gold .stat-value { color: var(--accent-gold); }
+        .stat-card.purple .stat-value { color: var(--accent-purple); }
+
+        /* ========== DASHBOARD ========== */
+        .dashboard { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+        .dashboard-main { display: flex; flex-direction: column; gap: 20px; }
+        .dashboard-sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+        .upcoming-section, .mini-calendar, .quick-actions {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+            overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .upcoming-section:hover, .mini-calendar:hover, .quick-actions:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .section-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 13px; }
+        .upcoming-list { max-height: 320px; overflow-y: auto; }
+        .upcoming-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+        .upcoming-item:hover { background: var(--bg-hover); }
+        .upcoming-item:last-child { border-bottom: none; }
+        .upcoming-date { text-align: center; min-width: 36px; }
+        .upcoming-date-day { font-size: 18px; font-weight: 700; line-height: 1; }
+        .upcoming-date-month { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; }
+        .upcoming-info { flex: 1; min-width: 0; }
+        .upcoming-customer { font-weight: 600; font-size: 13px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .upcoming-details { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .upcoming-status { display: flex; gap: 6px; }
+        .mini-pill { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
+        .mini-pill.working, .mini-pill.sent { background: rgba(255,149,0,0.2); color: var(--accent-orange); }
+        .mini-pill.done, .mini-pill.paid { background: rgba(0,200,117,0.2); color: var(--accent-green); }
+
+        /* ========== CALENDAR ========== */
+        .calendar-header { display: flex; align-items: center; justify-content: space-between; }
+        .calendar-month { font-weight: 600; font-size: 13px; }
+        .calendar-nav { display: flex; gap: 4px; }
+        .calendar-nav button { background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-primary); width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .calendar-grid { padding: 12px 16px; }
+        .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 6px; }
+        .calendar-weekday { font-size: 10px; color: var(--text-secondary); font-weight: 600; }
+        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+        .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; border-radius: 6px; cursor: default; }
+        .calendar-day.other-month { color: var(--text-muted); }
+        .calendar-day.today { background: var(--accent-blue); color: white; font-weight: 700; }
+        .calendar-day.has-due { background: rgba(255,149,0,0.2); color: var(--accent-orange); font-weight: 700; }
+
+        .quick-actions h3 { font-size: 13px; font-weight: 600; padding: 14px 16px 10px; border-bottom: 1px solid var(--border); }
+        .quick-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 11px 16px; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: all 0.15s; text-align: left; min-height: 44px; }
+        .quick-btn:last-child { border-bottom: none; }
+        .quick-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+        /* ========== TABLE ========== */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; min-width: 900px; }
+        thead th {
+            background: var(--bg-sidebar); padding: 10px 12px; text-align: left;
+            font-size: 11px; font-weight: 600; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.04em; position: sticky; top: 0; z-index: 10;
+            border-bottom: 1px solid var(--border); border-right: 1px solid var(--col-border);
+            cursor: grab; user-select: none;
+        }
+        thead th:hover { background: var(--bg-hover); color: var(--text-primary); }
+        thead th.dragging { opacity: 0.5; }
+        thead th.drag-over { background: rgba(0,113,227,0.2); border-color: var(--accent-blue); }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+        tbody tr:hover { background: rgba(255,255,255,0.02); }
+        tbody td { padding: 8px 10px; vertical-align: middle; border-right: 1px solid var(--col-border); font-size: 13px; }
+
+        .cell-input {
+            background: transparent; border: 1px solid transparent; border-radius: 6px;
+            color: var(--text-primary); font-family: inherit; font-size: 13px;
+            padding: 5px 8px; width: 100%; min-width: 100px; transition: border-color 0.15s;
+        }
+        .cell-input:focus { outline: none; border-color: var(--accent-blue); background: var(--bg-dark); }
+        .cell-input-name { font-weight: 600; min-width: 130px; }
+        .cell-select { background: var(--bg-dark); border: 1px solid transparent; border-radius: 6px; color: var(--text-primary); font-size: 12px; padding: 5px 8px; cursor: pointer; }
+        .cell-select:focus { outline: none; border-color: var(--accent-blue); }
+        .date-input, .datetime-input { background: var(--bg-dark); border: 1px solid transparent; border-radius: 6px; color: var(--text-primary); font-size: 12px; padding: 5px 8px; }
+        .date-input:focus, .datetime-input:focus { outline: none; border-color: var(--accent-blue); }
+
+        .status-pill {
+            display: inline-block; padding: 4px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        .status-pill:hover { opacity: 0.85; transform: scale(1.05); }
+        .status-working, .status-sent, .status-pending { background: rgba(255,149,0,0.2); color: var(--accent-orange); }
+        .status-done, .status-paid, .status-delivered { background: rgba(0,200,117,0.2); color: var(--accent-green); }
+        .status-intransit { background: rgba(0,113,227,0.2); color: var(--accent-blue); }
+        .status-cancelled { background: rgba(255,59,48,0.15); color: var(--accent-red); }
+
+        .contact-cell { cursor: pointer; }
+        .contact-email { font-size: 12px; color: var(--text-secondary); }
+        .contact-phone { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .contact-link { color: inherit; text-decoration: none; }
+        .contact-link:hover { color: var(--accent-blue); }
+
+        .file-indicator { font-size: 12px; color: var(--text-muted); cursor: pointer; padding: 3px 6px; border-radius: 4px; }
+        .file-indicator.has-file { color: var(--accent-blue); background: rgba(0,113,227,0.1); }
+        .file-indicator:hover { background: var(--bg-hover); }
+
+        .archive-btn { padding: 5px 10px; background: rgba(0,200,117,0.1); border: 1px solid rgba(0,200,117,0.3); border-radius: 6px; color: var(--accent-green); font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .archive-btn:hover { background: rgba(0,200,117,0.2); }
+
+        .add-row { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; color: var(--text-muted); font-size: 13px; cursor: pointer; border-top: 1px dashed var(--border); transition: all 0.15s; }
+        .add-row:hover { color: var(--text-primary); background: var(--bg-hover); }
+
+        /* ========== AVATAR ========== */
+        .avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+        .avatar.vahe { background: rgba(0,113,227,0.2); }
+        .avatar.dispatch { background: rgba(255,149,0,0.2); }
+
+        /* ========== MODALS ========== */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        .modal { background: var(--bg-card); border-radius: 16px; width: 520px; max-width: 94vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 80px rgba(0,0,0,0.6); animation: modalPop 0.25s cubic-bezier(0.175,0.885,0.32,1.275); border: 1px solid var(--border); }
+        @keyframes modalPop { from{transform:scale(0.92) translateY(16px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 18px; font-weight: 700; }
+        .modal-close { width: 32px; height: 32px; border: none; background: var(--bg-dark); color: var(--text-secondary); font-size: 18px; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .modal-body { padding: 20px 24px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-weight: 500; margin-bottom: 6px; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 12px; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: inherit; font-size: 14px; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(0,113,227,0.2); }
+        .form-select { cursor: pointer; }
+        .form-select option { background: var(--bg-card); }
+        .form-textarea { resize: vertical; min-height: 70px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+        /* ========== CALENDAR FULL VIEW ========== */
+        .calendar-view { padding: 4px 0; }
+        .calendar-view .calendar-header { padding: 12px 0 16px; display: flex; align-items: center; justify-content: space-between; }
+        .calendar-view .calendar-header h3 { font-size: 18px; font-weight: 700; }
+        .calendar-view .calendar-nav { display: flex; gap: 8px; }
+        .calendar-view .calendar-nav button { padding: 6px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 13px; cursor: pointer; }
+        .calendar-grid-full { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+        .calendar-day-header { background: var(--bg-sidebar); padding: 8px; text-align: center; font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; }
+        .calendar-day-cell { background: var(--bg-card); min-height: 90px; padding: 6px; }
+        .calendar-day-cell.other-month { background: var(--bg-dark); opacity: 0.5; }
+        .calendar-day-cell.today .calendar-day-number { background: var(--accent-blue); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+        .calendar-day-number { font-size: 12px; font-weight: 600; margin-bottom: 4px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+        .calendar-order { font-size: 10px; padding: 2px 5px; border-radius: 3px; margin-bottom: 2px; background: rgba(0,113,227,0.2); color: var(--accent-blue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+
+        /* ========== TOAST ========== */
+        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg-card); color: var(--text-primary); padding: 14px 20px; border-radius: 10px; font-size: 13px; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.4); border: 1px solid var(--border); border-left: 4px solid var(--accent-green); z-index: 2000; }
+        .toast.active { display: block; animation: toastSlide 0.3s cubic-bezier(0.175,0.885,0.32,1.275); }
+        @keyframes toastSlide { from{transform:translateX(80px) scale(0.9);opacity:0} to{transform:translateX(0) scale(1);opacity:1} }
+
+        /* ========== EMPTY STATE ========== */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .empty-state h3 { font-size: 18px; color: var(--text-primary); margin-bottom: 6px; }
+
+        /* ========== ATTACHMENTS ========== */
+        .attachment-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .attachment-item:last-child { border-bottom: none; }
+        .attachment-name { font-size: 13px; font-weight: 500; }
+        .attachment-size { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+        /* ========== RESPONSIVE ========== */
+        @media (hover: none) {
+            .upcoming-section:hover, .mini-calendar:hover, .quick-actions:hover { transform: none; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+            tr:hover { transform: none; box-shadow: none; }
+            .status-pill:hover { transform: none; }
+            .btn-primary:hover { opacity: 1; }
+        }
+        @media (max-width: 1100px) { .dashboard { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -230px; top: 0; bottom: 0; z-index: 100; transition: left 0.3s; }
+            .sidebar.open { left: 0; }
+            .mobile-header { display: flex; }
+            .board-header, .toolbar, .board-content { padding-left: 16px; padding-right: 16px; }
+            .board-header { padding-top: 16px; }
+            .board-title { font-size: 22px; }
+            .search-box { display: none; }
+            .form-row, .form-row-3 { grid-template-columns: 1fr; }
+            .install-banner { flex-direction: column; text-align: center; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-value { font-size: 26px; }
+            .table-container table { display: none; }
+            .table-cards { display: block !important; }
+            .modal { width: 100%; max-width: 100vw; max-height: 100vh; border-radius: 16px 16px 0 0; margin-top: auto; }
+            .modal-overlay.active { align-items: flex-end; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .board-title { font-size: 20px; }
+        }
+        @media (min-width: 769px) {
+            .mobile-header { display: none; }
+            .table-cards { display: none !important; }
+        }
+
+        /* ========== MOBILE CARDS ========== */
+        .table-cards { display: none; }
+        .table-card { background: var(--bg-card); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .table-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .table-card-name { font-size: 15px; font-weight: 700; }
+        .table-card-field { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--col-border); font-size: 13px; }
+        .table-card-field:last-child { border-bottom: none; }
+        .table-card-label { color: var(--text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+        .table-card-actions { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+        .table-card-actions .status-pill, .table-card-actions .archive-btn { flex: 1; text-align: center; }
+
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+        .sidebar-overlay.active { display: block; }
+
+        #three-bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+    </style>
+</head>
+<body>
+<canvas id="three-bg"></canvas>
+
+<!-- Password Gate -->
+<div class="password-gate" id="passwordGate">
+    <div class="logo-big">🚚</div>
+    <h1>Dispatch</h1>
+    <p>Bay Area Direct — Internal Portal</p>
+    <div class="password-form">
+        <input type="password" id="passwordInput" placeholder="Enter password" autofocus>
+        <div class="password-error" id="passwordError">Incorrect password</div>
+        <button onclick="checkPassword()">Enter</button>
+    </div>
+</div>
+
+<!-- PWA Install Banner -->
+<div class="install-banner" id="installBanner">
+    <div class="install-banner-text"><span>📱</span><span>Install Dispatch for quick access</span></div>
+    <div class="install-banner-actions">
+        <button class="install-btn" id="installBtn">Install App</button>
+        <button class="dismiss-btn" onclick="dismissInstall()">Not now</button>
+    </div>
+</div>
+
+<div class="app-container" id="appContainer" style="display:none;">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">🚚</div>
+                <div class="logo-text">Dispatch <span>Bay Area Direct</span></div>
+            </div>
+            <div class="sync-status" id="syncStatus">
+                <span class="sync-dot"></span>
+                <span class="sync-text">Connecting...</span>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <div class="profile-avatar">👤</div>
+            <div class="profile-info">
+                <div class="profile-name">Vahe</div>
+                <div class="profile-role">Dispatcher</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-item active" data-view="dashboard" onclick="showView('dashboard')">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+                Dashboard
+            </div>
+            <div class="nav-item" data-view="orders" onclick="showView('orders')">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 6a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2zm0 6a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z"/></svg>
+                Active Runs
+            </div>
+            <div class="nav-item" data-view="archive" onclick="showView('archive')">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z"/><path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"/></svg>
+                Archive
+            </div>
+        </nav>
+
+        <div class="sidebar-email-box">
+            <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">New from Email</div>
+            <textarea id="sidebarEmailPaste" placeholder="Paste order request email..." style="width:100%;min-height:72px;max-height:120px;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:inherit;font-size:12px;padding:8px;resize:vertical;"></textarea>
+            <button class="btn btn-primary" onclick="sidebarExtractEmail()" style="width:100%;margin-top:6px;padding:9px;font-size:12px;">Extract & New Run</button>
+        </div>
+
+        <div class="sidebar-footer">
+            <button class="fun-btn" onclick="showMotivation()">⚡ Driver Motivation</button>
+        </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <main class="main-content">
+        <div class="mobile-header">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+            <span style="font-weight:700;">Dispatch</span>
+        </div>
+        <div id="viewContainer"></div>
+    </main>
+</div>
+
+<!-- Add Run Modal -->
+<div class="modal-overlay" id="orderModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">New Delivery Run</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Assigned Driver</label>
+                    <select class="form-select" id="formPerson">
+                        <option value="vahe">👤 Vahe</option>
+                        <option value="dispatch">🚚 Dispatch</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Service Type</label>
+                    <select class="form-select" id="formItem">
+                        <option value="same-day">Same Day</option>
+                        <option value="rush">Rush (2hr)</option>
+                        <option value="medical">Medical</option>
+                        <option value="legal">Legal</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="routed">Routed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Customer / Company Name *</label>
+                <input type="text" class="form-input" id="formCustomerName" placeholder="Enter customer or company name">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <input type="email" class="form-input" id="formEmail" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" class="form-input" id="formPhone" placeholder="(415) 555-0000">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Pickup Address</label>
+                <input type="text" class="form-input" id="formFlavor" placeholder="123 Market St, San Francisco, CA">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Delivery Address</label>
+                    <input type="text" class="form-input" id="formComponents" placeholder="456 Broadway, Oakland, CA">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Package Type</label>
+                    <select class="form-select" id="formDelivery">
+                        <option value="envelope">Envelope / Docs</option>
+                        <option value="small">Small Package</option>
+                        <option value="medium">Medium Package</option>
+                        <option value="large">Large / Oversized</option>
+                        <option value="medical">Medical Specimen</option>
+                        <option value="fragile">Fragile</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Quantity / Pieces</label>
+                    <input type="number" class="form-input" id="formQuantity" min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Pickup Date & Time *</label>
+                    <input type="datetime-local" class="form-input" id="formDueDateTime">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Order Date</label>
+                    <input type="date" class="form-input" id="formOrderDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Price ($)</label>
+                    <input type="number" class="form-input" id="formPrice" min="0" step="0.01" placeholder="0.00">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Notes / Special Instructions</label>
+                <textarea class="form-textarea" id="formDescription" placeholder="Signature required, fragile items, access codes..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveOrder()">Add Run</button>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Modal -->
+<div class="modal-overlay" id="contactModal">
+    <div class="modal" style="max-width:360px;">
+        <div class="modal-header">
+            <h2 class="modal-title">Edit Contact</h2>
+            <button class="modal-close" onclick="closeContactModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="contactOrderId">
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" id="contactEmail">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" class="form-input" id="contactPhone">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeContactModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveContact()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Attachments Modal -->
+<div class="modal-overlay" id="attachmentsModal">
+    <div class="modal" style="max-width:480px;">
+        <div class="modal-header">
+            <h2 class="modal-title">Attachments / POD</h2>
+            <button class="modal-close" onclick="closeAttachmentsModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="attachmentsList"></div>
+            <button class="btn btn-primary" onclick="uploadAttachment()" style="margin-top:14px;width:100%;">📎 Upload File / POD Photo</button>
+            <p style="font-size:11px;color:var(--text-secondary);margin-top:6px;text-align:center;">Images, PDF · Max 10MB</p>
+        </div>
+    </div>
+</div>
+
+<!-- Email Parse Modal -->
+<div class="modal-overlay" id="emailParseModal">
+    <div class="modal" style="max-width:560px;">
+        <div class="modal-header">
+            <h2 class="modal-title">New Run from Email</h2>
+            <button class="modal-close" onclick="closeEmailParseModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Paste the full email body</label>
+                <textarea class="form-textarea" id="emailPasteTextarea" placeholder="Copy everything from the order request email..." rows="9"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="extractEmailInfo()">Extract Info</button>
+            <div id="extractedSection" style="display:none;margin-top:20px;">
+                <p style="color:var(--text-secondary);margin-bottom:14px;font-size:13px;">Review and edit if needed:</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Customer Name</label>
+                        <input type="text" class="form-input" id="extractedName">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="extractedEmail">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" class="form-input" id="extractedPhone">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeEmailParseModal()">Cancel</button>
+            <button class="btn btn-primary" id="populateOrderBtn" style="display:none;" onclick="populateOrderFromEmail()">Populate New Run</button>
+        </div>
+    </div>
+</div>
+
+<!-- Motivation Modal -->
+<div class="modal-overlay" id="motivationModal">
+    <div class="modal" style="max-width:380px;">
+        <div class="modal-header">
+            <h2 class="modal-title">⚡ Driver Motivation</h2>
+            <button class="modal-close" onclick="closeMotivationModal()">&times;</button>
+        </div>
+        <div style="text-align:center;padding:40px 24px;" id="motivationContent"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    // ========== CONFIG ==========
+    const APP_PASSWORD = 'Beton';
+
+    // ========== FIREBASE CONFIG ==========
+    // TODO: Replace with your own Firebase project for Bay Area Direct
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY_HERE",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+        projectId: "YOUR_PROJECT",
+        storageBucket: "YOUR_PROJECT.firebasestorage.app",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    let firebaseApp = null, firebaseDb = null, firebaseStorage = null;
+    let firebaseConnected = false, syncListenersAttached = false;
+
+    function initFirebase() {
+        try {
+            if (typeof firebase === 'undefined') { updateSyncStatus('offline', 'Offline mode'); return false; }
+            if (firebaseConfig.apiKey === 'YOUR_API_KEY_HERE') { updateSyncStatus('offline', 'Local only'); return false; }
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            firebaseDb = firebase.database();
+            firebaseStorage = firebase.storage();
+            firebaseDb.ref('.info/connected').on('value', (snap) => {
+                firebaseConnected = snap.val() === true;
+                if (firebaseConnected) {
+                    updateSyncStatus('synced', 'Synced');
+                    if (!syncListenersAttached) { attachFirebaseListeners(); syncListenersAttached = true; }
+                } else { updateSyncStatus('offline', 'Offline'); }
+            });
+            return true;
+        } catch(e) { updateSyncStatus('error', 'Error'); return false; }
+    }
+
+    function updateSyncStatus(status, text) {
+        const el = document.getElementById('syncStatus');
+        if (!el) return;
+        el.className = 'sync-status ' + status;
+        el.querySelector('.sync-text').textContent = text;
+    }
+
+    function attachFirebaseListeners() {
+        if (!firebaseDb) return;
+        firebaseDb.ref('orders').on('value', (snap) => {
+            const d = snap.val();
+            if (d && Array.isArray(d)) { orders = d; localStorage.setItem('dispatchOrders', JSON.stringify(orders)); renderView(); }
+        });
+        firebaseDb.ref('archive').on('value', (snap) => {
+            const d = snap.val();
+            if (d && Array.isArray(d)) { archive = d; localStorage.setItem('dispatchArchive', JSON.stringify(archive)); renderView(); }
+        });
+        firebaseDb.ref('columnOrder').on('value', (snap) => {
+            const d = snap.val();
+            if (d && Array.isArray(d)) { columnOrder = d; localStorage.setItem('dispatchColumns', JSON.stringify(columnOrder)); renderView(); }
+        });
+    }
+
+    async function loadFromFirebase() {
+        if (!firebaseDb) return false;
+        try {
+            updateSyncStatus('syncing', 'Loading...');
+            const [oSnap, aSnap, cSnap] = await Promise.all([
+                firebaseDb.ref('orders').once('value'),
+                firebaseDb.ref('archive').once('value'),
+                firebaseDb.ref('columnOrder').once('value')
+            ]);
+            if (oSnap.val() && Array.isArray(oSnap.val())) { orders = oSnap.val(); localStorage.setItem('dispatchOrders', JSON.stringify(orders)); }
+            if (aSnap.val() && Array.isArray(aSnap.val())) { archive = aSnap.val(); localStorage.setItem('dispatchArchive', JSON.stringify(archive)); }
+            if (cSnap.val() && Array.isArray(cSnap.val())) { columnOrder = cSnap.val(); localStorage.setItem('dispatchColumns', JSON.stringify(columnOrder)); }
+            if (!oSnap.val() && orders.length > 0) await firebaseDb.ref('orders').set(orders);
+            if (!aSnap.val() && archive.length > 0) await firebaseDb.ref('archive').set(archive);
+            if (!cSnap.val() && columnOrder.length > 0) await firebaseDb.ref('columnOrder').set(columnOrder);
+            updateSyncStatus('synced', 'Synced');
+            return true;
+        } catch(e) { updateSyncStatus('error', 'Load error'); return false; }
+    }
+
+    async function saveToFirebase() {
+        localStorage.setItem('dispatchOrders', JSON.stringify(orders));
+        localStorage.setItem('dispatchArchive', JSON.stringify(archive));
+        localStorage.setItem('dispatchColumns', JSON.stringify(columnOrder));
+        if (!firebaseDb) return;
+        try {
+            updateSyncStatus('syncing', 'Saving...');
+            await Promise.all([
+                firebaseDb.ref('orders').set(orders),
+                firebaseDb.ref('archive').set(archive),
+                firebaseDb.ref('columnOrder').set(columnOrder)
+            ]);
+            updateSyncStatus('synced', 'Synced');
+        } catch(e) { updateSyncStatus('error', 'Save error'); }
+    }
+
+    // ========== COLUMN CONFIG ==========
+    let columnOrder = JSON.parse(localStorage.getItem('dispatchColumns')) || [
+        'person', 'customerName', 'contact', 'item', 'flavor', 'components',
+        'delivery', 'quantity', 'orderDate', 'sketch', 'invoice', 'price', 'dueDateTime', 'attachments', 'description', 'actions'
+    ];
+
+    const columnLabels = {
+        person: 'Driver',
+        customerName: 'Customer',
+        contact: 'Contact',
+        item: 'Service',
+        flavor: 'Pickup Address',
+        components: 'Delivery Address',
+        delivery: 'Package Type',
+        quantity: 'Pieces',
+        orderDate: 'Order Date',
+        sketch: 'Status',
+        invoice: 'Invoice',
+        price: 'Price',
+        dueDateTime: 'Pickup Time',
+        attachments: 'POD',
+        description: 'Notes',
+        actions: 'Complete'
+    };
+
+    // ========== DATA ==========
+    let orders = JSON.parse(localStorage.getItem('dispatchOrders')) || [];
+    let archive = JSON.parse(localStorage.getItem('dispatchArchive')) || [];
+    let currentView = 'dashboard';
+    let calendarDate = new Date();
+    let activeFilter = null;
+    let ordersViewMode = 'table';
+    let calendarMonth = new Date().getMonth();
+    let calendarYear = new Date().getFullYear();
+
+    const generateId = () => 'run_' + Date.now() + '_' + Math.random().toString(36).substr(2,9);
+
+    function saveData() {
+        localStorage.setItem('dispatchOrders', JSON.stringify(orders));
+        localStorage.setItem('dispatchArchive', JSON.stringify(archive));
+        localStorage.setItem('dispatchColumns', JSON.stringify(columnOrder));
+        saveToFirebase();
+    }
+
+    // ========== PASSWORD ==========
+    function checkPassword() {
+        const input = document.getElementById('passwordInput').value;
+        if (input === APP_PASSWORD) {
+            document.getElementById('passwordGate').classList.add('hidden');
+            document.getElementById('appContainer').style.display = 'flex';
+            sessionStorage.setItem('dispatchAuth', 'true');
+            renderView();
+        } else {
+            document.getElementById('passwordError').classList.add('show');
+            document.getElementById('passwordInput').value = '';
+            setTimeout(() => document.getElementById('passwordError').classList.remove('show'), 2000);
+        }
+    }
+    document.getElementById('passwordInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPassword(); });
+    if (sessionStorage.getItem('dispatchAuth') === 'true') {
+        document.getElementById('passwordGate').classList.add('hidden');
+        document.getElementById('appContainer').style.display = 'flex';
+    }
+
+    // ========== PWA ==========
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault(); deferredPrompt = e;
+        if (!localStorage.getItem('dispatchInstallDismissed')) document.getElementById('installBanner').classList.add('show');
+    });
+    document.getElementById('installBtn').addEventListener('click', async () => {
+        if (deferredPrompt) { deferredPrompt.prompt(); const {outcome} = await deferredPrompt.userChoice; if (outcome === 'accepted') document.getElementById('installBanner').classList.remove('show'); deferredPrompt = null; }
+    });
+    function dismissInstall() { document.getElementById('installBanner').classList.remove('show'); localStorage.setItem('dispatchInstallDismissed','true'); }
+    window.addEventListener('appinstalled', () => document.getElementById('installBanner').classList.remove('show'));
+
+    // ========== UI ==========
+    function showToast(msg) {
+        const t = document.getElementById('toast'); t.textContent = msg;
+        t.classList.add('active'); setTimeout(() => t.classList.remove('active'), 3000);
+    }
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+    function showView(view) {
+        currentView = view;
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === view));
+        renderView();
+        if (window.innerWidth < 769) toggleSidebar();
+    }
+
+    // ========== MODAL ==========
+    function openAddModal() {
+        document.getElementById('formPerson').value = 'vahe';
+        document.getElementById('formItem').value = 'same-day';
+        document.getElementById('formCustomerName').value = '';
+        document.getElementById('formEmail').value = '';
+        document.getElementById('formPhone').value = '';
+        document.getElementById('formFlavor').value = '';
+        document.getElementById('formComponents').value = '';
+        document.getElementById('formDelivery').value = 'envelope';
+        document.getElementById('formQuantity').value = '1';
+        document.getElementById('formOrderDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('formDueDateTime').value = '';
+        document.getElementById('formPrice').value = '';
+        document.getElementById('formDescription').value = '';
+        document.getElementById('orderModal').classList.add('active');
+    }
+    function closeModal() { document.getElementById('orderModal').classList.remove('active'); }
+
+    function saveOrder() {
+        const customerName = document.getElementById('formCustomerName').value.trim();
+        const email = document.getElementById('formEmail').value.trim();
+        if (!customerName || !email) { showToast('Customer name and email required'); return; }
+        const dueDateTimeVal = document.getElementById('formDueDateTime').value;
+        orders.unshift({
+            id: generateId(),
+            person: document.getElementById('formPerson').value,
+            customerName, email,
+            phone: document.getElementById('formPhone').value.trim(),
+            item: document.getElementById('formItem').value,
+            flavor: document.getElementById('formFlavor').value.trim(),
+            components: document.getElementById('formComponents').value.trim(),
+            delivery: document.getElementById('formDelivery').value,
+            quantity: parseInt(document.getElementById('formQuantity').value) || 1,
+            orderDate: document.getElementById('formOrderDate').value,
+            dueDate: dueDateTimeVal ? dueDateTimeVal.split('T')[0] : '',
+            dueDateTime: dueDateTimeVal || '',
+            sketch: 'pending',
+            invoice: 'sent',
+            price: parseFloat(document.getElementById('formPrice').value) || 0,
+            attachments: [],
+            description: document.getElementById('formDescription').value.trim(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        });
+        saveData(); closeModal(); renderView(); showToast('Run added ✓');
+    }
+
+    function updateField(id, field, value) {
+        const order = orders.find(o => o.id === id) || archive.find(o => o.id === id);
+        if (order) {
+            order[field] = value;
+            order.updatedAt = new Date().toISOString();
+            if (field === 'dueDateTime' && value) order.dueDate = value.split('T')[0];
+            saveData(); renderView();
+        }
+    }
+
+    function archiveOrder(id) {
+        const idx = orders.findIndex(o => o.id === id);
+        if (idx !== -1) {
+            const order = orders.splice(idx, 1)[0];
+            order.archivedAt = new Date().toISOString();
+            archive.unshift(order);
+            saveData(); renderView(); showToast('Run completed ✓');
+        }
+    }
+    function restoreOrder(id) {
+        const idx = archive.findIndex(o => o.id === id);
+        if (idx !== -1) {
+            const order = archive.splice(idx, 1)[0];
+            delete order.archivedAt;
+            orders.unshift(order);
+            saveData(); renderView(); showToast('Run restored');
+        }
+    }
+
+    // ========== CONTACT ==========
+    function openContactModal(id) {
+        const o = orders.find(o => o.id === id) || archive.find(o => o.id === id);
+        if (!o) return;
+        document.getElementById('contactOrderId').value = id;
+        document.getElementById('contactEmail').value = o.email;
+        document.getElementById('contactPhone').value = o.phone || '';
+        document.getElementById('contactModal').classList.add('active');
+    }
+    function closeContactModal() { document.getElementById('contactModal').classList.remove('active'); }
+    function saveContact() {
+        const id = document.getElementById('contactOrderId').value;
+        const o = orders.find(o => o.id === id) || archive.find(o => o.id === id);
+        if (o) {
+            o.email = document.getElementById('contactEmail').value.trim();
+            o.phone = document.getElementById('contactPhone').value.trim();
+            o.updatedAt = new Date().toISOString();
+            saveData(); renderView(); closeContactModal();
+        }
+    }
+
+    // ========== EMAIL PARSE ==========
+    function openEmailParseModal() {
+        document.getElementById('emailPasteTextarea').value = '';
+        document.getElementById('extractedSection').style.display = 'none';
+        document.getElementById('populateOrderBtn').style.display = 'none';
+        document.getElementById('emailParseModal').classList.add('active');
+    }
+    function closeEmailParseModal() { document.getElementById('emailParseModal').classList.remove('active'); }
+
+    function extractEmailInfo() {
+        const text = document.getElementById('emailPasteTextarea').value;
+        if (!text.trim()) { showToast('Paste an email first'); return; }
+        const extracted = parseOrderFromEmail(text);
+        window._lastParsed = extracted;
+        document.getElementById('extractedName').value = [extracted.firstName, extracted.lastName].filter(Boolean).join(' ');
+        document.getElementById('extractedEmail').value = extracted.email || '';
+        document.getElementById('extractedPhone').value = extracted.phone || '';
+        document.getElementById('extractedSection').style.display = 'block';
+        document.getElementById('populateOrderBtn').style.display = 'inline-flex';
+    }
+
+    function populateOrderFromEmail() {
+        const name = document.getElementById('extractedName').value.trim();
+        const email = document.getElementById('extractedEmail').value.trim();
+        const phone = document.getElementById('extractedPhone').value.trim();
+        closeEmailParseModal(); openAddModal();
+        document.getElementById('formCustomerName').value = name;
+        document.getElementById('formEmail').value = email;
+        document.getElementById('formPhone').value = phone;
+        if (window._lastParsed) {
+            const e = window._lastParsed;
+            if (e.item) document.getElementById('formItem').value = e.item;
+            if (e.flavor) document.getElementById('formFlavor').value = e.flavor;
+            if (e.components) document.getElementById('formComponents').value = e.components;
+            if (e.delivery) document.getElementById('formDelivery').value = e.delivery;
+            if (e.dueDate) document.getElementById('formDueDateTime').value = e.dueDate + 'T09:00';
+            if (e.description) document.getElementById('formDescription').value = e.description;
+        }
+    }
+
+    function sidebarExtractEmail() {
+        const text = document.getElementById('sidebarEmailPaste').value;
+        if (!text.trim()) { showToast('Paste an email first'); return; }
+        const extracted = parseOrderFromEmail(text);
+        window._lastParsed = extracted;
+        const name = [extracted.firstName, extracted.lastName].filter(Boolean).join(' ');
+        openAddModal();
+        document.getElementById('formCustomerName').value = name;
+        document.getElementById('formEmail').value = extracted.email || '';
+        document.getElementById('formPhone').value = extracted.phone || '';
+        if (extracted.item) document.getElementById('formItem').value = extracted.item;
+        if (extracted.flavor) document.getElementById('formFlavor').value = extracted.flavor;
+        if (extracted.components) document.getElementById('formComponents').value = extracted.components;
+        if (extracted.delivery) document.getElementById('formDelivery').value = extracted.delivery;
+        if (extracted.dueDate) document.getElementById('formDueDateTime').value = extracted.dueDate + 'T09:00';
+        if (extracted.description) document.getElementById('formDescription').value = extracted.description;
+        document.getElementById('sidebarEmailPaste').value = '';
+        if (window.innerWidth < 769) toggleSidebar();
+        showToast(extracted.customerName ? 'Parsed: ' + name : 'Email parsed — review and save');
+    }
+
+    function parseOrderFromEmail(text) {
+        let firstName='',lastName='',email='',phone='',item='',flavor='',components='',delivery='',dueDate='',description='';
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+
+        for (let line of lines) {
+            if (!line.includes(':')) continue;
+            const colonIdx = line.indexOf(':');
+            const key = line.substring(0, colonIdx).trim().toLowerCase();
+            const value = line.substring(colonIdx + 1).trim();
+            if (/email|e-mail/.test(key)) email = value || extractEmailFromLine(line);
+            else if (/phone|tel|mobile|cell/.test(key)) phone = value;
+            else if (/first.*name|given/.test(key)) firstName = value;
+            else if (/last.*name|surname/.test(key)) lastName = value;
+            else if (/^(name|full name|customer|company|from)$/.test(key) && !firstName) { const p = value.split(/\s+/); firstName = p[0]; lastName = p.slice(1).join(' '); }
+            else if (/^(pickup|from address|origin|sender)$/.test(key)) flavor = value;
+            else if (/^(delivery|to address|destination|recipient address)$/.test(key)) components = value;
+            else if (/^(service|type|rush|priority)$/.test(key)) item = value.toLowerCase();
+            else if (/^(package|item|contents)$/.test(key)) delivery = value;
+            else if (/^(date|pickup date|when|schedule|time)$/.test(key)) dueDate = value;
+            else if (/^(notes?|instructions?|special|description)$/.test(key)) description = value;
+        }
+
+        // Email / phone fallback
+        if (!email) { const m = text.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/i); if (m) email = m[0]; }
+        if (!phone) { const m = text.match(/(\+?\d{1,3}[-.\s]?)?(\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/); if (m) phone = m[0]; }
+
+        // From: header
+        const fromMatch = text.match(/From:\s*([^<]+?)\s*<([^>]+)>/i);
+        if (fromMatch && !email) {
+            email = fromMatch[2].trim();
+            if (!firstName) { const p = fromMatch[1].trim().split(/\s+/); firstName = p[0]; lastName = p.slice(1).join(' '); }
+        }
+
+        // Service type detection
+        if (!item) {
+            if (/rush|urgent|2.?hour/i.test(text)) item = 'rush';
+            else if (/medical|specimen|lab|hipaa/i.test(text)) item = 'medical';
+            else if (/legal|court|attorney|law firm/i.test(text)) item = 'legal';
+            else if (/scheduled|regular/i.test(text)) item = 'scheduled';
+            else if (/routed|route/i.test(text)) item = 'routed';
+            else item = 'same-day';
+        }
+
+        // Date detection
+        if (!dueDate) {
+            const monthNames = 'january|february|march|april|may|june|july|august|september|october|november|december';
+            const dm = text.match(new RegExp(`(${monthNames})\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:[,\\s]+(\\d{4}))?`, 'i'));
+            if (dm) {
+                const months = {january:1,february:2,march:3,april:4,may:5,june:6,july:7,august:8,september:9,october:10,november:11,december:12};
+                const m = months[dm[1].toLowerCase()], d = parseInt(dm[2]), y = dm[3] ? parseInt(dm[3]) : new Date().getFullYear();
+                dueDate = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            }
+            if (!dueDate) {
+                const sd = text.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+                if (sd) { const y = sd[3].length === 2 ? '20'+sd[3] : sd[3]; dueDate = `${y}-${sd[1].padStart(2,'0')}-${sd[2].padStart(2,'0')}`; }
+            }
+        }
+
+        return { firstName, lastName, email, phone, item, flavor, components, delivery, dueDate, description };
+    }
+
+    function extractEmailFromLine(line) {
+        const m = line.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/i);
+        return m ? m[0] : '';
+    }
+
+    // ========== FILTERS ==========
+    function filterByInvoice(status) { activeFilter = { type: 'invoice', value: status }; renderView(); }
+    function filterBySketch(status) { activeFilter = { type: 'sketch', value: status }; renderView(); }
+    function clearFilter() { activeFilter = null; renderView(); }
+    function setOrdersViewMode(mode) { ordersViewMode = mode; renderOrdersTable(); }
+    function prevMonth() { calendarMonth--; if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; } renderOrdersTable(); }
+    function nextMonth() { calendarMonth++; if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; } renderOrdersTable(); }
+    function goToToday() { calendarMonth = new Date().getMonth(); calendarYear = new Date().getFullYear(); renderOrdersTable(); }
+
+    // ========== MOTIVATION ==========
+    const motivations = [
+        "Every mile you drive is a promise kept.",
+        "On time, every time. That's the Bay Area Direct way.",
+        "You're not just delivering packages — you're delivering trust.",
+        "The city moves because you move.",
+        "Another run. Another customer taken care of.",
+        "Bay to bay, delivery to delivery — let's get it.",
+        "Drivers like you are why clients keep calling back.",
+        "Stay safe. Drive smart. Get it there.",
+        "No traffic, no problem. You've seen it all.",
+        "The hustle is real. So is the paycheck. Let's go."
+    ];
+    function showMotivation() {
+        document.getElementById('motivationContent').innerHTML = `<p style="font-size:20px;line-height:1.7;font-weight:600;color:var(--text-primary);">"${motivations[Math.floor(Math.random()*motivations.length)]}"</p>`;
+        document.getElementById('motivationModal').classList.add('active');
+    }
+    function closeMotivationModal() { document.getElementById('motivationModal').classList.remove('active'); }
+
+    // ========== ATTACHMENTS ==========
+    let currentAttachmentOrderId = null;
+    function openAttachmentsModal(orderId) {
+        currentAttachmentOrderId = orderId;
+        const order = orders.find(o => o.id === orderId) || archive.find(o => o.id === orderId);
+        if (!order) return;
+        const atts = order.attachments || [];
+        document.getElementById('attachmentsList').innerHTML = atts.length === 0
+            ? '<p style="color:var(--text-secondary);text-align:center;padding:20px;">No attachments / POD yet</p>'
+            : atts.map((att, idx) => `
+                <div class="attachment-item">
+                    <div><div class="attachment-name">${escapeHtml(att.name)}</div><div class="attachment-size">${formatFileSize(att.size)}</div></div>
+                    <div style="display:flex;gap:6px;">
+                        <a href="${att.url}" target="_blank" class="btn btn-secondary" style="padding:4px 8px;font-size:12px;">View</a>
+                        <button onclick="deleteAttachment(${idx})" class="btn btn-secondary" style="padding:4px 8px;font-size:12px;background:var(--accent-red);border-color:var(--accent-red);">Delete</button>
+                    </div>
+                </div>`).join('');
+        document.getElementById('attachmentsModal').classList.add('active');
+    }
+    function closeAttachmentsModal() { document.getElementById('attachmentsModal').classList.remove('active'); currentAttachmentOrderId = null; }
+
+    async function uploadAttachment() {
+        if (!currentAttachmentOrderId || !firebaseStorage) { showToast('Storage not configured'); return; }
+        const input = document.createElement('input');
+        input.type = 'file'; input.accept = 'image/*,.pdf';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 10 * 1024 * 1024) { showToast('File too large (max 10MB)'); return; }
+            showToast('Uploading...');
+            try {
+                const order = orders.find(o => o.id === currentAttachmentOrderId); if (!order) return;
+                const safeName = order.customerName.replace(/[^a-zA-Z0-9]/g,'_');
+                const path = `runs/${safeName}/${Date.now()}_${file.name}`;
+                const ref = firebaseStorage.ref(path);
+                const snapshot = await ref.put(file);
+                const url = await snapshot.ref.getDownloadURL();
+                if (!order.attachments) order.attachments = [];
+                order.attachments.push({ name: file.name, size: file.size, url, path, uploadedAt: new Date().toISOString() });
+                order.updatedAt = new Date().toISOString();
+                saveData(); openAttachmentsModal(currentAttachmentOrderId); showToast('Uploaded ✓');
+            } catch(err) { showToast('Upload failed'); }
+        };
+        input.click();
+    }
+
+    async function deleteAttachment(index) {
+        const order = orders.find(o => o.id === currentAttachmentOrderId); if (!order || !order.attachments?.[index]) return;
+        const att = order.attachments[index];
+        try { if (firebaseStorage && att.path) await firebaseStorage.ref(att.path).delete(); } catch(e) {}
+        order.attachments.splice(index, 1); order.updatedAt = new Date().toISOString();
+        saveData(); openAttachmentsModal(currentAttachmentOrderId); showToast('Deleted');
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+        return (bytes/(1024*1024)).toFixed(1) + ' MB';
+    }
+
+    // ========== RENDER ==========
+    const escapeHtml = (text) => { if (!text) return ''; const d = document.createElement('div'); d.textContent = text; return d.innerHTML; };
+    const formatDate = (s) => { if (!s) return ''; return new Date(s+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); };
+    const formatDateTime = (s) => {
+        if (!s) return '';
+        const d = new Date(s); if (isNaN(d.getTime())) return formatDate(s);
+        return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    };
+
+    function renderView() {
+        const container = document.getElementById('viewContainer');
+        if (!container) return;
+        if (currentView === 'dashboard') renderDashboard(container);
+        else renderOrdersView(container);
+    }
+
+    // ========== DASHBOARD ==========
+    function renderDashboard(container) {
+        const now = new Date();
+        const weekFromNow = new Date(now.getTime() + 7*24*60*60*1000);
+        const activeCount = orders.length;
+        const dueThisWeek = orders.filter(o => { const ds = o.dueDateTime||o.dueDate; if(!ds) return false; const due=new Date(ds); return due>=now&&due<=weekFromNow; }).length;
+        const unpaidCount = orders.filter(o => o.invoice === 'sent').length;
+        const inTransit = orders.filter(o => o.sketch === 'intransit').length;
+        const paidRevenue = orders.filter(o=>o.invoice==='paid'&&o.price).reduce((s,o)=>s+(parseFloat(o.price)||0),0);
+        const outstanding = orders.filter(o=>o.invoice==='sent'&&o.price).reduce((s,o)=>s+(parseFloat(o.price)||0),0);
+
+        const todayStr = now.toISOString().split('T')[0];
+        const tomorrow = new Date(now.getTime()+86400000);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        const dueToday = orders.filter(o => { const ds = o.dueDateTime ? o.dueDateTime.split('T')[0] : o.dueDate; return ds === todayStr; });
+        const dueTomorrow = orders.filter(o => { const ds = o.dueDateTime ? o.dueDateTime.split('T')[0] : o.dueDate; return ds === tomorrowStr; });
+        const overdue = orders.filter(o => { const ds=o.dueDateTime||o.dueDate; if(!ds) return false; const due=new Date(ds.includes('T')?ds:ds+'T23:59:59'); return due<now&&o.sketch!=='delivered'; });
+
+        let alertHTML = '';
+        if (overdue.length > 0) alertHTML += `<div class="alert-banner urgent"><span>🔴</span><strong>${overdue.length} overdue run${overdue.length>1?'s':''}!</strong>&nbsp;${overdue.map(o=>o.customerName.split(' ')[0]).join(', ')}</div>`;
+        if (dueToday.length > 0) alertHTML += `<div class="alert-banner urgent"><span>⚡</span><strong>${dueToday.length} run${dueToday.length>1?'s':''} due TODAY!</strong>&nbsp;${dueToday.map(o=>o.customerName.split(' ')[0]).join(', ')}</div>`;
+        if (dueTomorrow.length > 0) alertHTML += `<div class="alert-banner"><span>⚠️</span><strong>${dueTomorrow.length} run${dueTomorrow.length>1?'s':''} due tomorrow.</strong>&nbsp;${dueTomorrow.map(o=>o.customerName.split(' ')[0]).join(', ')}</div>`;
+
+        const upcoming = [...orders].filter(o=>o.dueDateTime||o.dueDate).sort((a,b)=>new Date(a.dueDateTime||a.dueDate)-new Date(b.dueDateTime||b.dueDate)).slice(0,8);
+
+        container.innerHTML = `
+            <div class="board-header"><h1 class="board-title">Dashboard</h1><p class="board-subtitle">Bay Area Direct — Dispatch Overview</p></div>
+            <div class="board-content">
+                ${alertHTML}
+                <div class="dashboard">
+                    <div class="dashboard-main">
+                        <div class="stats-grid">
+                            <div class="stat-card blue" onclick="showView('orders')" style="cursor:pointer;"><div class="stat-value">${activeCount}</div><div class="stat-label">Active Runs</div></div>
+                            <div class="stat-card orange"><div class="stat-value">${dueThisWeek}</div><div class="stat-label">Due This Week</div></div>
+                            <div class="stat-card purple"><div class="stat-value">${inTransit}</div><div class="stat-label">In Transit</div></div>
+                            <div class="stat-card red"><div class="stat-value">${unpaidCount}</div><div class="stat-label">Unpaid Invoices</div></div>
+                        </div>
+                        <div class="stats-grid" style="margin-top:12px;">
+                            <div class="stat-card gold"><div class="stat-value">$${paidRevenue.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="stat-label">Revenue (Paid)</div></div>
+                            <div class="stat-card green"><div class="stat-value">$${outstanding.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="stat-label">Outstanding</div></div>
+                        </div>
+                        <div class="upcoming-section">
+                            <div class="section-header"><span>📅 Upcoming Pickups</span><button class="btn btn-secondary" style="padding:5px 10px;font-size:11px;" onclick="showView('orders')">View All</button></div>
+                            <div class="upcoming-list">
+                                ${upcoming.length === 0 ? '<div style="padding:30px;text-align:center;color:var(--text-secondary);">No upcoming runs</div>' : upcoming.map(o => {
+                                    const ds = o.dueDateTime||o.dueDate;
+                                    const due = new Date(ds.includes('T')?ds:ds+'T00:00:00');
+                                    const timeStr = o.dueDateTime&&o.dueDateTime.includes('T') ? due.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '';
+                                    return `<div class="upcoming-item" onclick="showView('orders')">
+                                        <div class="upcoming-date"><div class="upcoming-date-day">${due.getDate()}</div><div class="upcoming-date-month">${due.toLocaleDateString('en-US',{month:'short'})}</div></div>
+                                        <div class="upcoming-info">
+                                            <div class="upcoming-customer">${escapeHtml(o.customerName)}</div>
+                                            <div class="upcoming-details">${o.item||'Run'}${timeStr?' · '+timeStr:''} · ${o.flavor||'No pickup addr'}</div>
+                                        </div>
+                                        <div class="upcoming-status">
+                                            <span class="mini-pill ${o.sketch}">${o.sketch==='pending'?'Pending':o.sketch==='intransit'?'Transit':o.sketch==='delivered'?'✓ Delivered':'Done'}</span>
+                                            <span class="mini-pill ${o.invoice}">${o.invoice==='sent'?'Unpaid':'✓ Paid'}</span>
+                                        </div>
+                                    </div>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-sidebar">
+                        <div class="mini-calendar">
+                            <div class="section-header">
+                                <span class="calendar-month">${calendarDate.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</span>
+                                <div class="calendar-nav"><button onclick="changeMonth(-1)">‹</button><button onclick="changeMonth(1)">›</button></div>
+                            </div>
+                            <div class="calendar-grid">
+                                <div class="calendar-weekdays">${['Su','Mo','Tu','We','Th','Fr','Sa'].map(d=>`<div class="calendar-weekday">${d}</div>`).join('')}</div>
+                                <div class="calendar-days">${renderCalendarDays()}</div>
+                            </div>
+                        </div>
+                        <div class="quick-actions">
+                            <h3>Quick Actions</h3>
+                            <button class="quick-btn" onclick="openAddModal()">➕ New Run</button>
+                            <button class="quick-btn" onclick="showView('orders')">📋 View All Runs</button>
+                            <button class="quick-btn" onclick="exportCSV()">📥 Export CSV</button>
+                            <button class="quick-btn" onclick="openEmailParseModal()">📧 New from Email</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    function renderCalendarDays() {
+        const year = calendarDate.getFullYear(), month = calendarDate.getMonth(), today = new Date();
+        const firstDay = new Date(year,month,1), lastDay = new Date(year,month+1,0);
+        const startPad = firstDay.getDay(), daysInMonth = lastDay.getDate();
+        const dueDates = new Set();
+        orders.forEach(o => { const ds=o.dueDateTime||o.dueDate; if(ds){const d=new Date(ds.includes('T')?ds:ds+'T00:00:00'); if(d.getFullYear()===year&&d.getMonth()===month) dueDates.add(d.getDate());} });
+        let html = '';
+        const prev = new Date(year,month,0);
+        for (let i=startPad-1;i>=0;i--) html += `<div class="calendar-day other-month">${prev.getDate()-i}</div>`;
+        for (let day=1;day<=daysInMonth;day++) {
+            const isToday = today.getFullYear()===year&&today.getMonth()===month&&today.getDate()===day;
+            const hasDue = dueDates.has(day);
+            const cls = ['calendar-day', isToday?'today':'', hasDue?'has-due':''].filter(Boolean).join(' ');
+            html += `<div class="${cls}">${day}</div>`;
+        }
+        const rem = 42-(startPad+daysInMonth);
+        for (let i=1;i<=rem;i++) html += `<div class="calendar-day other-month">${i}</div>`;
+        return html;
+    }
+
+    function changeMonth(delta) { calendarDate.setMonth(calendarDate.getMonth()+delta); renderView(); }
+
+    // ========== ORDERS VIEW ==========
+    function renderOrdersView(container) {
+        const isArchive = currentView === 'archive';
+        const title = isArchive ? 'Archive' : 'Active Runs';
+        const subtitle = isArchive ? 'Completed deliveries' : 'Same Day · Rush · Medical · Legal · Scheduled';
+        container.innerHTML = `
+            <div class="board-header"><h1 class="board-title">${title}</h1><p class="board-subtitle">${subtitle}</p></div>
+            <div class="toolbar">
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/></svg>
+                    New Run
+                </button>
+                <button class="btn btn-secondary" onclick="exportCSV()">📥 Export</button>
+                <button class="btn btn-secondary" onclick="openEmailParseModal()">📧 From Email</button>
+                ${activeFilter ? `<button class="btn btn-secondary" onclick="clearFilter()" style="background:var(--accent-red);border-color:var(--accent-red);">✕ Clear Filter</button>` : ''}
+                <div class="view-toggle">
+                    <button class="${ordersViewMode==='table'?'active':''}" onclick="setOrdersViewMode('table')">☰ List</button>
+                    <button class="${ordersViewMode==='calendar'?'active':''}" onclick="setOrdersViewMode('calendar')">📅 Calendar</button>
+                </div>
+                <select class="sort-dropdown" id="sortSelect" onchange="sortOrders()" ${ordersViewMode==='calendar'?'style="display:none;"':''}>
+                    <option value="dueDateTime-asc">Pickup Time (Soonest)</option>
+                    <option value="dueDateTime-desc">Pickup Time (Latest)</option>
+                    <option value="orderDate-desc">Order Date (Newest)</option>
+                    <option value="customerName-asc">Customer A-Z</option>
+                </select>
+                <div class="search-box">
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="var(--text-muted)"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"/></svg>
+                    <input type="text" placeholder="Search runs..." id="searchInput" oninput="renderView()">
+                </div>
+            </div>
+            <div class="board-content" id="ordersTableContainer"></div>`;
+        renderOrdersTable();
+    }
+
+    function renderOrdersTable() {
+        const container = document.getElementById('ordersTableContainer');
+        if (!container) return;
+        const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+        let data = currentView === 'archive' ? archive : orders;
+        if (activeFilter && !currentView.includes('archive')) {
+            if (activeFilter.type === 'invoice') data = data.filter(o => o.invoice !== 'paid');
+            else if (activeFilter.type === 'sketch') data = data.filter(o => o.sketch === 'pending' || !o.sketch);
+        }
+        if (search) data = data.filter(o =>
+            (o.customerName||'').toLowerCase().includes(search) ||
+            (o.email||'').toLowerCase().includes(search) ||
+            (o.phone||'').includes(search) ||
+            (o.flavor||'').toLowerCase().includes(search) ||
+            (o.components||'').toLowerCase().includes(search) ||
+            (o.item||'').toLowerCase().includes(search)
+        );
+
+        if (data.length === 0 && ordersViewMode === 'table') {
+            container.innerHTML = `<div class="empty-state"><h3>${currentView==='archive'?'Archive is empty':'No active runs'}</h3><p>${currentView==='archive'?'Completed runs will appear here':'Click "New Run" to get started'}</p></div>`;
+            return;
+        }
+
+        if (ordersViewMode === 'calendar' && currentView !== 'archive') {
+            container.innerHTML = renderCalendarView(data); return;
+        }
+
+        container.innerHTML = `
+            <div class="table-container">
+                <table>
+                    <thead><tr>${columnOrder.map(col => `<th draggable="true" data-col="${col}" ondragstart="onDragStart(event)" ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave(event)">${columnLabels[col]||col}</th>`).join('')}</tr></thead>
+                    <tbody>${data.map(o => renderRow(o)).join('')}</tbody>
+                </table>
+                ${currentView!=='archive'?`<div class="add-row" onclick="openAddModal()"><svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/></svg> Add Run</div>`:''}
+            </div>
+            <div class="table-cards">
+                ${data.map(o => renderCard(o)).join('')}
+                ${currentView!=='archive'?`<div class="add-row" onclick="openAddModal()" style="background:var(--bg-card);border-radius:12px;border:1px dashed var(--border);"><svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/></svg> Add Run</div>`:''}
+            </div>`;
+    }
+
+    function renderRow(order) {
+        const statusOptions = ['pending','intransit','delivered','cancelled'];
+        const serviceOptions = ['same-day','rush','medical','legal','scheduled','routed'];
+        const packageOptions = ['envelope','small','medium','large','medical','fragile'];
+
+        const cells = {
+            person: `<td><div class="avatar ${order.person}">${order.person==='vahe'?'👤':'🚚'}</div></td>`,
+            customerName: `<td><input type="text" class="cell-input cell-input-name" value="${escapeHtml(order.customerName)}" onchange="updateField('${order.id}','customerName',this.value)"></td>`,
+            contact: `<td><div class="contact-cell" onclick="openContactModal('${order.id}')">
+                <div class="contact-email"><a href="mailto:${escapeHtml(order.email)}" class="contact-link" onclick="event.stopPropagation();">${escapeHtml(order.email)}</a></div>
+                ${order.phone?`<div class="contact-phone"><a href="tel:${order.phone.replace(/[^\d+]/g,'')}" class="contact-link" onclick="event.stopPropagation();">${escapeHtml(order.phone)}</a></div>`:''}
+            </div></td>`,
+            item: `<td><select class="cell-select" onchange="updateField('${order.id}','item',this.value)">${serviceOptions.map(s=>`<option value="${s}" ${order.item===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1).replace('-',' ')}</option>`).join('')}</select></td>`,
+            flavor: `<td><input type="text" class="cell-input" value="${escapeHtml(order.flavor||'')}" placeholder="Pickup address..." style="min-width:160px;" onchange="updateField('${order.id}','flavor',this.value)"></td>`,
+            components: `<td><input type="text" class="cell-input" value="${escapeHtml(order.components||'')}" placeholder="Delivery address..." style="min-width:160px;" onchange="updateField('${order.id}','components',this.value)"></td>`,
+            delivery: `<td><select class="cell-select" onchange="updateField('${order.id}','delivery',this.value)">${packageOptions.map(p=>`<option value="${p}" ${order.delivery===p?'selected':''}>${p.charAt(0).toUpperCase()+p.slice(1)}</option>`).join('')}</select></td>`,
+            quantity: `<td><input type="number" class="cell-input" style="width:55px;text-align:center;" min="1" value="${order.quantity||1}" onchange="updateField('${order.id}','quantity',parseInt(this.value)||1)"></td>`,
+            orderDate: `<td><input type="date" class="date-input" value="${order.orderDate||''}" onchange="updateField('${order.id}','orderDate',this.value)"></td>`,
+            sketch: `<td>
+                <select class="cell-select status-pill status-${order.sketch||'pending'}" onchange="updateField('${order.id}','sketch',this.value)" style="padding:4px 8px;font-size:11px;font-weight:700;">
+                    <option value="pending" ${order.sketch==='pending'?'selected':''}>Pending</option>
+                    <option value="intransit" ${order.sketch==='intransit'?'selected':''}>In Transit</option>
+                    <option value="delivered" ${order.sketch==='delivered'?'selected':''}>Delivered</option>
+                    <option value="cancelled" ${order.sketch==='cancelled'?'selected':''}>Cancelled</option>
+                </select>
+            </td>`,
+            invoice: `<td><span class="status-pill status-${order.invoice}" onclick="updateField('${order.id}','invoice','${order.invoice==='sent'?'paid':'sent'}')">${order.invoice==='sent'?'Unpaid':'Paid'}</span></td>`,
+            price: `<td><input type="number" class="cell-input" style="width:80px;text-align:right;color:var(--accent-gold);" min="0" step="0.01" value="${order.price||''}" placeholder="$0" onchange="updateField('${order.id}','price',parseFloat(this.value)||0)"></td>`,
+            dueDateTime: `<td><input type="datetime-local" class="datetime-input" value="${order.dueDateTime||''}" onchange="updateField('${order.id}','dueDateTime',this.value)"></td>`,
+            attachments: `<td><span class="file-indicator ${order.attachments?.length?'has-file':''}" onclick="openAttachmentsModal('${order.id}')">📎 ${order.attachments?.length||0}</span></td>`,
+            description: `<td><input type="text" class="cell-input" value="${escapeHtml(order.description||'')}" placeholder="Notes..." onchange="updateField('${order.id}','description',this.value)"></td>`,
+            actions: currentView!=='archive'
+                ? `<td><button class="archive-btn" onclick="archiveOrder('${order.id}')">✓ Complete</button></td>`
+                : `<td><button class="archive-btn" onclick="restoreOrder('${order.id}')">↩ Restore</button></td>`
+        };
+        return `<tr>${columnOrder.map(col => cells[col]||'<td></td>').join('')}</tr>`;
+    }
+
+    function renderCard(order) {
+        const isArchive = currentView === 'archive';
+        return `<div class="table-card">
+            <div class="table-card-header">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="avatar ${order.person}">${order.person==='vahe'?'👤':'🚚'}</div>
+                    <div class="table-card-name">${escapeHtml(order.customerName)}</div>
+                </div>
+                <span class="status-pill status-${order.sketch||'pending'}" onclick="updateField('${order.id}','sketch',order.sketch==='pending'?'intransit':order.sketch==='intransit'?'delivered':'pending')" style="font-size:10px;padding:3px 8px;">
+                    ${order.sketch==='pending'?'Pending':order.sketch==='intransit'?'In Transit':'Delivered'}
+                </span>
+            </div>
+            <div class="table-card-field"><span class="table-card-label">Service</span><span>${(order.item||'').replace('-',' ')}</span></div>
+            ${order.flavor?`<div class="table-card-field"><span class="table-card-label">Pickup</span><span>${escapeHtml(order.flavor)}</span></div>`:''}
+            ${order.components?`<div class="table-card-field"><span class="table-card-label">Delivery</span><span>${escapeHtml(order.components)}</span></div>`:''}
+            <div class="table-card-field"><span class="table-card-label">Contact</span><span><a href="mailto:${escapeHtml(order.email)}" class="contact-link">${escapeHtml(order.email)}</a>${order.phone?` · <a href="tel:${order.phone.replace(/[^\d+]/g,'')}" class="contact-link">${escapeHtml(order.phone)}</a>`:''}</span></div>
+            ${(order.dueDateTime||order.dueDate)?`<div class="table-card-field"><span class="table-card-label">Pickup Time</span><span>${order.dueDateTime?formatDateTime(order.dueDateTime):formatDate(order.dueDate)}</span></div>`:''}
+            ${order.price?`<div class="table-card-field"><span class="table-card-label">Price</span><span style="color:var(--accent-gold);font-weight:700;">$${parseFloat(order.price).toFixed(2)}</span></div>`:''}
+            <div class="table-card-actions">
+                <span class="status-pill status-${order.invoice}" onclick="updateField('${order.id}','invoice','${order.invoice==='sent'?'paid':'sent'}')" style="font-size:11px;">${order.invoice==='sent'?'Unpaid':'Paid'}</span>
+                <button class="archive-btn" onclick="${isArchive?`restoreOrder('${order.id}')`:` archiveOrder('${order.id}')`}">${isArchive?'↩ Restore':'✓ Complete'}</button>
+            </div>
+        </div>`;
+    }
+
+    // ========== CALENDAR VIEW ==========
+    function renderCalendarView(data) {
+        const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const firstDay = new Date(calendarYear,calendarMonth,1);
+        const lastDay = new Date(calendarYear,calendarMonth+1,0);
+        const startDay = firstDay.getDay(), daysInMonth = lastDay.getDate();
+        const todayStr = new Date().toISOString().split('T')[0];
+        const ordersByDate = {};
+        data.forEach(o => { const d=o.dueDateTime?o.dueDateTime.split('T')[0]:o.dueDate; if(d){if(!ordersByDate[d])ordersByDate[d]=[];ordersByDate[d].push(o);} });
+        let html = `<div class="calendar-view">
+            <div class="calendar-view .calendar-header" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 16px;">
+                <h3 style="font-size:18px;font-weight:700;">${monthNames[calendarMonth]} ${calendarYear}</h3>
+                <div style="display:flex;gap:8px;">
+                    <button onclick="prevMonth()" class="btn btn-secondary" style="padding:5px 12px;">← Prev</button>
+                    <button onclick="goToToday()" class="btn btn-secondary" style="padding:5px 12px;">Today</button>
+                    <button onclick="nextMonth()" class="btn btn-secondary" style="padding:5px 12px;">Next →</button>
+                </div>
+            </div>
+            <div class="calendar-grid-full">
+                ${dayNames.map(d=>`<div class="calendar-day-header">${d}</div>`).join('')}`;
+        const prevMonthLastDay = new Date(calendarYear,calendarMonth,0).getDate();
+        for (let i=startDay-1;i>=0;i--) html += `<div class="calendar-day-cell other-month"><div class="calendar-day-number">${prevMonthLastDay-i}</div></div>`;
+        for (let day=1;day<=daysInMonth;day++) {
+            const dateStr = `${calendarYear}-${String(calendarMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const isToday = dateStr===todayStr;
+            const dayOrders = ordersByDate[dateStr]||[];
+            html += `<div class="calendar-day-cell ${isToday?'today':''}">
+                <div class="calendar-day-number">${day}</div>
+                ${dayOrders.slice(0,3).map(o=>`<div class="calendar-order" title="${o.customerName} — ${o.item}">${o.customerName.split(' ')[0]} · ${o.item||'Run'}</div>`).join('')}
+                ${dayOrders.length>3?`<div style="font-size:10px;color:var(--text-secondary);padding:2px 4px;">+${dayOrders.length-3} more</div>`:''}
+            </div>`;
+        }
+        const rem = (7-(startDay+daysInMonth)%7)%7;
+        for (let i=1;i<=rem;i++) html += `<div class="calendar-day-cell other-month"><div class="calendar-day-number">${i}</div></div>`;
+        html += `</div></div>`;
+        return html;
+    }
+
+    // ========== EXPORT ==========
+    function exportCSV() {
+        const data = currentView==='archive'?archive:orders;
+        const headers = ['Customer','Email','Phone','Service','Pickup Address','Delivery Address','Package Type','Pieces','Order Date','Pickup Time','Status','Invoice','Price','Notes','Driver'];
+        const rows = data.map(o => [o.customerName,o.email,o.phone||'',o.item,o.flavor||'',o.components||'',o.delivery,o.quantity||1,o.orderDate,o.dueDateTime||o.dueDate||'',o.sketch,o.invoice,o.price||0,o.description||'',o.person]);
+        const csv = [headers,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv],{type:'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download=`dispatch_${currentView}_${new Date().toISOString().split('T')[0]}.csv`; a.click();
+        URL.revokeObjectURL(url); showToast('Exported to CSV');
+    }
+
+    // ========== SORT ==========
+    function sortOrders() {
+        const [field,dir] = document.getElementById('sortSelect').value.split('-');
+        const mult = dir==='asc'?1:-1;
+        orders.sort((a,b) => {
+            let va=a[field]||'', vb=b[field]||'';
+            if (field.includes('Date')||field.includes('DateTime')) { va=va?new Date(va).getTime():0; vb=vb?new Date(vb).getTime():0; }
+            if (va<vb) return -1*mult; if (va>vb) return 1*mult; return 0;
+        });
+        saveData(); renderView();
+    }
+
+    // ========== COLUMN DRAG ==========
+    let draggedCol = null;
+    function onDragStart(e) { draggedCol=e.target.dataset.col; e.target.classList.add('dragging'); }
+    function onDragOver(e) { e.preventDefault(); e.target.classList.add('drag-over'); }
+    function onDragLeave(e) { e.target.classList.remove('drag-over'); }
+    function onDrop(e) {
+        e.preventDefault(); e.target.classList.remove('drag-over');
+        const targetCol = e.target.dataset.col;
+        if (draggedCol&&targetCol&&draggedCol!==targetCol) {
+            const fi=columnOrder.indexOf(draggedCol), ti=columnOrder.indexOf(targetCol);
+            columnOrder.splice(fi,1); columnOrder.splice(ti,0,draggedCol);
+            saveData(); renderView();
+        }
+        document.querySelectorAll('th').forEach(th=>th.classList.remove('dragging')); draggedCol=null;
+    }
+
+    // ========== KEYBOARD ==========
+    document.addEventListener('keydown', (e) => {
+        if (e.key==='Escape') { closeModal(); closeContactModal(); closeEmailParseModal(); closeAttachmentsModal(); closeMotivationModal(); }
+        if (e.key==='n'&&(e.ctrlKey||e.metaKey)) { e.preventDefault(); openAddModal(); }
+    });
+
+    // ========== SWIPE ==========
+    let touchStartX=0, touchStartY=0;
+    document.addEventListener('touchstart', e=>{touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;},{passive:true});
+    document.addEventListener('touchend', e=>{
+        const dx=e.changedTouches[0].clientX-touchStartX, dy=Math.abs(e.changedTouches[0].clientY-touchStartY);
+        if(dy>80) return;
+        const sb=document.getElementById('sidebar'), ov=document.getElementById('sidebarOverlay');
+        if(!sb.classList.contains('open')&&touchStartX<30&&dx>60){sb.classList.add('open');ov.classList.add('active');}
+        else if(sb.classList.contains('open')&&dx<-60){sb.classList.remove('open');ov.classList.remove('active');}
+    },{passive:true});
+
+    // ========== INIT ==========
+    renderView();
+    (async function init() {
+        const ready = initFirebase();
+        if (ready) { await loadFromFirebase(); renderView(); }
+    })();
+
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(r=>r.forEach(sw=>sw.unregister())); }
+</script>
+
+<!-- Three.js particle background -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.min.js"></script>
+<script>
+    const canvas = document.getElementById('three-bg');
+    const isMobile = window.innerWidth < 768;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!prefersReducedMotion) {
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+        camera.position.z = 30;
+        const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:!isMobile});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile?1:2));
+        const count = isMobile ? 600 : 3000;
+        const positions = new Float32Array(count*3), colors = new Float32Array(count*3);
+        const brandColors = [new THREE.Color('#0071e3'), new THREE.Color('#00c875'), new THREE.Color('#ff9500'), new THREE.Color('#ffd60a')];
+        for (let i=0;i<count;i++) {
+            positions[i*3]=(Math.random()-0.5)*60; positions[i*3+1]=(Math.random()-0.5)*60; positions[i*3+2]=(Math.random()-0.5)*40;
+            const c=brandColors[Math.floor(Math.random()*brandColors.length)]; colors[i*3]=c.r; colors[i*3+1]=c.g; colors[i*3+2]=c.b;
+        }
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+        geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+        const mat = new THREE.PointsMaterial({size:isMobile?0.2:0.35, vertexColors:true, blending:THREE.AdditiveBlending, transparent:true, depthWrite:false});
+        const particles = new THREE.Points(geo, mat);
+        scene.add(particles);
+        let mouseX=0, mouseY=0;
+        if (!isMobile) document.addEventListener('mousemove', e=>{mouseX=(e.clientX/window.innerWidth)*2-1; mouseY=-(e.clientY/window.innerHeight)*2+1;});
+        (function animate() {
+            requestAnimationFrame(animate);
+            particles.rotation.y += isMobile?0.0002:0.0004;
+            particles.rotation.x += isMobile?0.0001:0.0002;
+            if (!isMobile) { particles.rotation.y+=mouseX*0.00005; particles.rotation.x+=mouseY*0.00005; }
+            renderer.render(scene, camera);
+        })();
+        window.addEventListener('resize', ()=>{ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth,window.innerHeight); });
+    }
+</script>
+</body>
+</html>
